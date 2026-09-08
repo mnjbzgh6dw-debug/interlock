@@ -243,7 +243,7 @@ export default function LiftDetail() {
                         <span className="block font-mono text-15">
                           {inspection.verificationCode}
                         </span>
-                        <span className="block text-15 text-slate">
+                        <span className="block text-15">
                           {fails === 0
                             ? 'No defects recorded'
                             : `${fails} ${fails === 1 ? 'defect' : 'defects'} recorded`}
@@ -274,7 +274,17 @@ export default function LiftDetail() {
 
       <div className="fixed inset-x-0 bottom-0 border-t border-rail bg-white">
         <div className="mx-auto max-w-[560px] px-4 py-3">
-          {lift.formId === null ? (
+          {state.persona !== 'inspector' ? (
+            /*
+             * Brief section 6: only the inspector starts, completes and signs
+             * inspections. Without this the button is live in every persona and
+             * attributes the record to J. Marais whoever tapped it.
+             */
+            <p className="text-17">
+              Inspections are started by {personaById.get('inspector')!.organisation}. Switch to
+              the inspector in the demo controls to start one.
+            </p>
+          ) : lift.formId === null ? (
             <p className="text-17">{scopeStatementFor(lift)}</p>
           ) : (
             <button

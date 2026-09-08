@@ -125,7 +125,7 @@ export default function Portfolio() {
               <span className="text-17">{RESPONSIBILITY_LABEL.owner}</span>
               <span className="text-17">
                 {ownerCarries.length}{' '}
-                <span className="text-slate">
+                <span className="text-15">
                   {ownerCarries.filter((d) => isOverdue(d, state.demoDate)).length} overdue
                 </span>
               </span>
@@ -134,7 +134,7 @@ export default function Portfolio() {
               <span className="text-17">{RESPONSIBILITY_LABEL.serviceCompany}</span>
               <span className="text-17">
                 {companyCarries.length}{' '}
-                <span className="text-slate">
+                <span className="text-15">
                   {companyCarries.filter((d) => isOverdue(d, state.demoDate)).length} overdue
                 </span>
               </span>
@@ -207,7 +207,7 @@ export default function Portfolio() {
                       <span className="block text-15">
                         {lift.label} &middot; due {formatDay(defect.dueDate)}
                       </span>
-                      <span className="block text-15 text-slate">
+                      <span className="block text-15">
                         {RESPONSIBILITY_LABEL[defect.responsibility]}
                       </span>
                     </Link>

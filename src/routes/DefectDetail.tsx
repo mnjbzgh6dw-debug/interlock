@@ -173,7 +173,7 @@ export default function DefectDetail() {
             <dt className="text-13 font-medium text-slate">Responsibility</dt>
             <dd className="text-right text-17">
               {RESPONSIBILITY_LABEL[defect.responsibility]}
-              <span className="block text-15 text-slate">
+              <span className="block text-15">
                 {responsiblePartyName(state, defect)}
               </span>
             </dd>
@@ -217,7 +217,7 @@ export default function DefectDetail() {
                   <li key={reminder.date} className="py-2">
                     <p className="text-17">
                       {formatDay(reminder.date)}
-                      <span className="text-slate"> &middot; {reminder.reason}</span>
+                      <span className="text-15"> &middot; {reminder.reason}</span>
                     </p>
                     <p className="text-15">{reminder.recipients.join(', ')}</p>
                   </li>

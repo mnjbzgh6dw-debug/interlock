@@ -14,7 +14,7 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import { ClauseSheet } from '../components/ClauseSheet'
 import { StopUseInterstitial } from '../components/StopUseInterstitial'
 import { StopUseNotice } from '../components/StopUseNotice'
@@ -318,6 +318,10 @@ export default function InspectionForm() {
   }, [lift, inspection, navigate])
 
   if (!lift || !inspection) return null
+
+  // Brief section 6: the inspection flow belongs to the inspector alone.
+  if (state.persona !== 'inspector') return <Navigate to={`/lift/${lift.id}`} replace />
+
 
   const form = formPassengerA
   const progress = sectionProgress(form, inspection)

@@ -52,7 +52,7 @@ function DefectRow({ defect, demoDate }: { defect: Defect; demoDate: string }) {
           <span className="block text-15">
             {lift.label}, {buildingFor(lift).name}
           </span>
-          <span className="block text-15 text-slate">
+          <span className="block text-15">
             {RESPONSIBILITY_LABEL[defect.responsibility]} &middot;{' '}
             {responsiblePartyName(state, defect)}
           </span>
@@ -122,7 +122,7 @@ export default function Worklist() {
                 </>
               )}
               {closable.length !== open.length && (
-                <span className="text-slate">
+                <span>
                   {' '}
                   &middot; {closable.length} assigned to you
                 </span>

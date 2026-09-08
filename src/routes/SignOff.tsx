@@ -7,7 +7,7 @@
  * signature itself, because an unsigned statutory report is not a report.
  */
 
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import { PlaceholderBanner } from '../components/PlaceholderBanner'
 import { SignaturePad } from '../components/SignaturePad'
 import { StatusPill } from '../components/StatusPill'
@@ -44,6 +44,9 @@ export default function SignOff() {
       </div>
     )
   }
+
+  // Brief section 6: the inspection flow belongs to the inspector alone.
+  if (state.persona !== 'inspector') return <Navigate to={`/lift/${lift.id}`} replace />
 
   const form = formPassengerA
   const inspector = personaById.get('inspector')!

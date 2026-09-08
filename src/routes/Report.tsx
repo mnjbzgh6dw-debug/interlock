@@ -263,7 +263,7 @@ export default function Report() {
                     className="h-16"
                   />
                 ) : (
-                  <p className="text-15 text-slate">Section not signed</p>
+                  <p className="text-15">Section not signed</p>
                 )}
                 <p className="border-t border-shaft pt-1 text-13">
                   {inspection.inspectorName}, section {section.id}, {formatDay(inspectionDay)}
@@ -353,7 +353,7 @@ export default function Report() {
                 className="h-20"
               />
             ) : (
-              <p className="text-15 text-slate">Not signed</p>
+              <p className="text-15">Not signed</p>
             )}
             <div className="border-t border-shaft pt-1">
               <p className="text-15 font-medium">{inspection.inspectorName}</p>

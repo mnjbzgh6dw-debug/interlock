@@ -7,7 +7,7 @@
  * second of the three things the demo has to land.
  */
 
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import { PlaceholderBanner } from '../components/PlaceholderBanner'
 import { StatusPill } from '../components/StatusPill'
 import { formItems } from '../data/form-passenger-a'
@@ -44,6 +44,9 @@ export default function DefectReview() {
       </div>
     )
   }
+
+  // Brief section 6: the inspection flow belongs to the inspector alone.
+  if (state.persona !== 'inspector') return <Navigate to={`/lift/${lift.id}`} replace />
 
   const defects = state.defects
     .filter((defect) => defect.inspectionId === inspection.id)
