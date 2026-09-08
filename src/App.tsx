@@ -1,3 +1,5 @@
+import { Logo, LogoLockup } from './components/Logo'
+
 /**
  * Scaffold check. Temporary: replaced by the lift register at item 4.
  * It exists to prove the four things item 1 has to deliver: the named palette,
@@ -40,6 +42,51 @@ export default function App() {
       <p className="mt-1 text-15 text-slate">
         Scaffold check. Replaced by the lift register at item 4.
       </p>
+
+      <section className="mt-8">
+        <Label>Logo, default variant on light surfaces</Label>
+        <div className="mt-2 flex items-end gap-4 rounded-card border border-rail bg-white p-3">
+          <Logo size={20} />
+          <Logo size={32} />
+          <Logo size={40} />
+          <Logo size={64} />
+        </div>
+      </section>
+
+      <section className="mt-8">
+        <Label>Logo, default variant on shaft chrome</Label>
+        <div className="mt-2 flex items-end gap-4 rounded-card bg-shaft p-3">
+          <Logo size={20} />
+          <Logo size={32} />
+          <Logo size={40} />
+          <Logo size={64} />
+        </div>
+      </section>
+
+      <section className="mt-8">
+        <Label>Logo, reversed variant for the report letterhead</Label>
+        <div className="mt-2 flex items-end gap-4 rounded-card border border-rail bg-white p-3">
+          <Logo size={20} variant="reversed" />
+          <Logo size={32} variant="reversed" />
+          <Logo size={40} variant="reversed" />
+          <Logo size={64} variant="reversed" container="fill" />
+        </div>
+      </section>
+
+      <section className="mt-8">
+        <Label>Lockup, wordmark centred on the bolt</Label>
+        <div className="mt-2 space-y-4 rounded-card border border-rail bg-white p-3">
+          <div>
+            <LogoLockup size={40} variant="reversed" className="text-shaft" />
+          </div>
+          <div>
+            <LogoLockup size={28} variant="reversed" className="text-shaft" />
+          </div>
+        </div>
+        <div className="mt-2 rounded-card bg-shaft p-3">
+          <LogoLockup size={40} className="text-white" />
+        </div>
+      </section>
 
       <section className="mt-8">
         <Label>Brand colours, never used for status</Label>
