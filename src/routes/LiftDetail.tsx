@@ -4,7 +4,7 @@
  * primary action in a fixed bottom bar. QR entry lands here at item 18.
  */
 
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { AppHeader } from '../components/AppHeader'
 import { LiftTypeIcon } from '../components/LiftTypeIcon'
 import { StatusPill } from '../components/StatusPill'
@@ -15,6 +15,8 @@ import {
   TONE_TEXT,
 } from '../lib/compliance'
 import { formatDay } from '../lib/dates'
+import { createInspection, inProgressFor } from '../lib/inspection'
+import { personaById } from '../data/personas'
 import {
   buildingFor,
   defectsFor,
@@ -95,7 +97,8 @@ function IdentityBlock({ lift }: { lift: Lift }) {
 
 export default function LiftDetail() {
   const { liftId } = useParams()
-  const { state } = useStore()
+  const navigate = useNavigate()
+  const { state, saveInspection } = useStore()
   const lift = liftId ? liftById(state, liftId) : undefined
 
   if (!lift) {
@@ -117,7 +120,24 @@ export default function LiftDetail() {
   }
 
   const clock = complianceFor(lift, state.demoDate)
-  const history = inspectionsFor(state, lift.id)
+  const inProgress = inProgressFor(state.inspections, lift.id)
+  const history = inspectionsFor(state, lift.id).filter((i) => i.completedAt !== null)
+
+  /**
+   * Writes go straight to local state, with no network in the path. An
+   * inspection already in progress is resumed rather than duplicated.
+   */
+  function startInspection() {
+    if (!lift) return
+    if (!inProgress) {
+      const inspector = personaById.get('inspector')!
+      saveInspection(
+        createInspection(lift, inspector, state.demoDate, state.connection === 'offline'),
+      )
+    }
+    navigate(`/lift/${lift.id}/inspection`)
+  }
+
   const defects = defectsFor(state, lift.id)
   const open = defects.filter((d) => d.status === 'open')
   const closed = defects.filter((d) => d.status === 'closed')
@@ -231,16 +251,13 @@ export default function LiftDetail() {
           {lift.formId === null ? (
             <p className="text-17">{scopeStatementFor(lift)}</p>
           ) : (
-            <>
-              <button
-                type="button"
-                disabled
-                className="h-tap w-full rounded-card bg-signal text-17 font-medium text-white disabled:bg-rail disabled:text-slate"
-              >
-                Start inspection
-              </button>
-              <p className="mt-1 text-13 text-slate">Scaffolding: the form arrives at item 6.</p>
-            </>
+            <button
+              type="button"
+              onClick={startInspection}
+              className="h-tap w-full rounded-card bg-signal text-17 font-medium text-white"
+            >
+              {inProgress ? 'Resume inspection' : 'Start inspection'}
+            </button>
           )}
         </div>
       </div>

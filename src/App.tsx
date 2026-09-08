@@ -1,12 +1,14 @@
 import { Route, Routes } from 'react-router-dom'
 import Register from './routes/Register'
 import LiftDetail from './routes/LiftDetail'
+import InspectionForm from './routes/InspectionForm'
 
 export default function App() {
   return (
     <Routes>
       <Route path="/" element={<Register />} />
       <Route path="/lift/:liftId" element={<LiftDetail />} />
+      <Route path="/lift/:liftId/inspection" element={<InspectionForm />} />
     </Routes>
   )
 }
