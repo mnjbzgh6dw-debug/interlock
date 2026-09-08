@@ -5,14 +5,15 @@
  * statutory paper heritage. Navigation between sections is free and the progress
  * strip reports completion rather than gating it.
  *
- * Item 6 stops short of three things that arrive next: the clause reference is
- * plain text until item 7 gives it a sheet, photo capture and its blocking rule
- * is item 8, and an immediate failure records itself without the stop-use
- * interstitial until item 9.
+ * The one hard gate is photo-required-on-fail: a failed item that needs a photo
+ * holds section navigation until one is attached. An immediate failure still
+ * records itself without the stop-use interstitial, which is item 9.
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { ClauseSheet } from '../components/ClauseSheet'
+import { PhotoCapture } from '../components/PhotoCapture'
 import { PlaceholderBanner } from '../components/PlaceholderBanner'
 import { SignaturePad } from '../components/SignaturePad'
 import { formPassengerA } from '../data/form-passenger-a'
@@ -174,19 +175,32 @@ function ItemRow({
   response,
   demoDate,
   onResponse,
+  onOpenClause,
 }: {
   item: FormItem
   response: ResponseEntry | undefined
   demoDate: string
   onResponse: (next: ResponseEntry | null) => void
+  onOpenClause: () => void
 }) {
+  const failed = response?.result === 'fail'
+  const photoOutstanding = failed && item.photoRequiredOnFail && !response?.photo
+
   return (
-    <li className="py-4">
-      <p className="text-17">
-        <span className="font-medium">{item.id}</span> {item.text}
-      </p>
-      {/* Item 7 turns this into the clause sheet. Plain text until it does. */}
-      <p className="mt-0.5 text-13 font-medium">{item.clauseRef}</p>
+    <li className="py-3">
+      <div className="flex items-start gap-2">
+        <p className="flex-1 text-17">
+          <span className="font-medium">{item.id}</span> {item.text}
+        </p>
+        {/* Shares the item's vertical space, so a 48px hit area costs no height. */}
+        <button
+          type="button"
+          onClick={onOpenClause}
+          className="-my-1 h-tap shrink-0 px-2 text-13 font-medium text-signal"
+        >
+          {item.clauseRef}
+        </button>
+      </div>
 
       {item.responseType === 'passFail' && (
         <ResultChoice
@@ -218,6 +232,22 @@ function ItemRow({
       )}
 
       <ResultLine item={item} response={response} />
+
+      {failed && (
+        <>
+          {photoOutstanding && (
+            <p className="mt-2 text-15 text-stop">
+              A photograph is required before leaving this item.
+            </p>
+          )}
+          <PhotoCapture
+            label={item.text.toLowerCase()}
+            required={item.photoRequiredOnFail}
+            value={response?.photo}
+            onChange={(photo) => onResponse({ ...response!, photo })}
+          />
+        </>
+      )}
     </li>
   )
 }
@@ -232,7 +262,32 @@ export default function InspectionForm() {
     [state.inspections, liftId],
   )
   const [sectionId, setSectionId] = useState('A')
+  const [clauseItem, setClauseItem] = useState<FormItem | null>(null)
   const bodyRef = useRef<HTMLDivElement | null>(null)
+  const savedScroll = useRef(0)
+
+  /**
+   * Brief section 9: "Back to item" returns to the exact scroll position. The
+   * body is pinned while the sheet is open, because iOS Safari will not hold a
+   * scroll offset behind an overlay otherwise, and the offset is put back on
+   * close. Both halves live in the same effect so they cannot drift apart.
+   */
+  useEffect(() => {
+    if (!clauseItem) return
+    const y = savedScroll.current
+    const body = document.body
+    body.style.position = 'fixed'
+    body.style.top = `-${y}px`
+    body.style.left = '0'
+    body.style.right = '0'
+    return () => {
+      body.style.position = ''
+      body.style.top = ''
+      body.style.left = ''
+      body.style.right = ''
+      window.scrollTo(0, y)
+    }
+  }, [clauseItem])
 
   // No in-progress inspection means this was reached directly. Send them back
   // to the lift rather than inventing a record from a URL.
@@ -249,6 +304,19 @@ export default function InspectionForm() {
   const total = totalItems(form)
   const index = form.sections.findIndex((s) => s.id === section.id)
   const next = form.sections[index + 1]
+
+  /**
+   * The one hard gate, per brief section 9. A failed item that requires a
+   * photograph holds section navigation until it has one. Everything else about
+   * completion is reporting: unanswered items never block.
+   */
+  const photoBlockers = section.items.filter(
+    (item) =>
+      item.photoRequiredOnFail &&
+      inspection.responses[item.id]?.result === 'fail' &&
+      !inspection.responses[item.id]?.photo,
+  )
+  const blocked = photoBlockers.length > 0
 
   function update(patch: Partial<Inspection>) {
     saveInspection({ ...inspection!, ...patch })
@@ -306,10 +374,11 @@ export default function InspectionForm() {
                   key={entry.id}
                   type="button"
                   onClick={() => goToSection(entry.id)}
+                  disabled={blocked && !current}
                   aria-current={current ? 'true' : undefined}
                   className={`h-tap flex-1 rounded-card border text-13 font-medium ${
                     current ? 'border-signal bg-signal text-white' : 'border-rail bg-white'
-                  }`}
+                  } disabled:border-rail disabled:bg-paper disabled:text-slate`}
                 >
                   <span className="block text-17">{entry.id}</span>
                   <span className={current ? 'text-white' : entry.complete ? 'text-verified' : ''}>
@@ -336,6 +405,10 @@ export default function InspectionForm() {
               response={inspection.responses[item.id]}
               demoDate={state.demoDate}
               onResponse={(response) => setResponse(item.id, response)}
+              onOpenClause={() => {
+                savedScroll.current = window.scrollY
+                setClauseItem(item)
+              }}
             />
           ))}
         </ul>
@@ -357,13 +430,23 @@ export default function InspectionForm() {
         </div>
       </main>
 
+      {clauseItem && <ClauseSheet item={clauseItem} onClose={() => setClauseItem(null)} />}
+
       <div className="fixed inset-x-0 bottom-0 border-t border-rail bg-white">
         <div className="mx-auto max-w-[560px] px-4 py-3">
+          {blocked && (
+            <p className="mb-2 text-15 text-stop">
+              {photoBlockers.map((item) => item.id).join(' and ')}{' '}
+              {photoBlockers.length === 1 ? 'needs' : 'need'} a photograph before you leave this
+              section.
+            </p>
+          )}
           {next ? (
             <button
               type="button"
               onClick={() => goToSection(next.id)}
-              className="h-tap w-full rounded-card bg-signal text-17 font-medium text-white"
+              disabled={blocked}
+              className="h-tap w-full rounded-card bg-signal text-17 font-medium text-white disabled:bg-rail disabled:text-slate"
             >
               Next section: {next.id}. {next.title}
             </button>

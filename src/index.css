@@ -42,6 +42,20 @@
     @apply outline-none ring-2 ring-signal ring-offset-2 ring-offset-paper;
   }
 
+  /*
+   * Brief 4.6: motion only where it shows what changed. The clause sheet slides
+   * up. Driven by a keyframe rather than a JS-toggled transform, so the resting
+   * state is visible even if the animation never runs.
+   */
+  @keyframes sheet-up {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+
   /* Brief 4.6 */
   @media (prefers-reduced-motion: reduce) {
     *,
@@ -52,5 +66,11 @@
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
     }
+  }
+}
+
+@layer components {
+  .sheet-up {
+    animation: sheet-up 200ms ease-out;
   }
 }
