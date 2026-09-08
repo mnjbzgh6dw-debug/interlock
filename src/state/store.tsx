@@ -53,6 +53,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       saveLift: (lift) => dispatch({ type: 'setLift', lift }),
       saveInspection: (inspection) => dispatch({ type: 'putInspection', inspection }),
       saveDefect: (defect) => dispatch({ type: 'putDefect', defect }),
+      saveDefects: (defects) => dispatch({ type: 'setDefects', defects }),
       resetDemoData: () => {
         clearState()
         lastSaved.current = ''

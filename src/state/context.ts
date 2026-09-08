@@ -18,6 +18,7 @@ export type Store = {
   saveLift: (lift: Lift) => void
   saveInspection: (inspection: Inspection) => void
   saveDefect: (defect: Defect) => void
+  saveDefects: (defects: Defect[]) => void
   resetDemoData: () => void
 }
 
@@ -57,6 +58,8 @@ export function reducer(state: AppState, action: Action): AppState {
       return { ...state, inspections: replaceById(state.inspections, action.inspection) }
     case 'putDefect':
       return { ...state, defects: replaceById(state.defects, action.defect) }
+    case 'setDefects':
+      return { ...state, defects: action.defects }
     case 'storageFull':
       // Returning the same object keeps a failing save from looping on itself.
       return state.storageFull ? state : { ...state, storageFull: true }

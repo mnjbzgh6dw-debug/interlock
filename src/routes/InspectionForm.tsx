@@ -6,17 +6,23 @@
  * strip reports completion rather than gating it.
  *
  * The one hard gate is photo-required-on-fail: a failed item that needs a photo
- * holds section navigation until one is attached. An immediate failure still
- * records itself without the stop-use interstitial, which is item 9.
+ * holds section navigation until one is attached.
+ *
+ * Committing a failure on an `immediate` item puts the lift out of use and
+ * raises the interstitial, once per failure. The order is in force from the
+ * moment of the failure, not from the moment it is acknowledged.
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ClauseSheet } from '../components/ClauseSheet'
+import { StopUseInterstitial } from '../components/StopUseInterstitial'
 import { PhotoCapture } from '../components/PhotoCapture'
 import { PlaceholderBanner } from '../components/PlaceholderBanner'
 import { SignaturePad } from '../components/SignaturePad'
 import { formPassengerA } from '../data/form-passenger-a'
+import { notificationRecipients, reconcileDefects } from '../lib/defects'
+import { formItems } from '../data/form-passenger-a'
 import {
   commitDateCheck,
   commitMeasurement,
@@ -25,7 +31,7 @@ import {
   totalItems,
   type Committed,
 } from '../lib/inspection'
-import { buildingFor, liftById } from '../state/selectors'
+import { buildingFor, liftById, serviceCompanyFor } from '../state/selectors'
 import { useStore } from '../state/useStore'
 import type { FormItem, Inspection, ResponseEntry, ResponseResult } from '../types'
 
@@ -255,7 +261,7 @@ function ItemRow({
 export default function InspectionForm() {
   const { liftId } = useParams()
   const navigate = useNavigate()
-  const { state, saveInspection } = useStore()
+  const { state, saveInspection, saveLift, saveDefects } = useStore()
   const lift = liftId ? liftById(state, liftId) : undefined
   const inspection = useMemo(
     () => state.inspections.find((i) => i.liftId === liftId && i.completedAt === null),
@@ -263,6 +269,8 @@ export default function InspectionForm() {
   )
   const [sectionId, setSectionId] = useState('A')
   const [clauseItem, setClauseItem] = useState<FormItem | null>(null)
+  /** Item ids whose stop-use order has been raised but not yet acknowledged. */
+  const [pendingStopUse, setPendingStopUse] = useState<string[]>([])
   const bodyRef = useRef<HTMLDivElement | null>(null)
   const savedScroll = useRef(0)
 
@@ -310,6 +318,9 @@ export default function InspectionForm() {
    * photograph holds section navigation until it has one. Everything else about
    * completion is reporting: unanswered items never block.
    */
+  const stopUseItem = pendingStopUse[0] ? formItems.get(pendingStopUse[0]) : undefined
+  const failureCount = Object.values(inspection.responses).filter((r) => r.result === 'fail').length
+
   const photoBlockers = section.items.filter(
     (item) =>
       item.photoRequiredOnFail &&
@@ -323,13 +334,53 @@ export default function InspectionForm() {
   }
 
   function setResponse(itemId: string, response: ResponseEntry | null) {
-    const responses = { ...inspection!.responses }
+    const current = inspection!
+    const responses = { ...current.responses }
+    const wasFailing = responses[itemId]?.result === 'fail'
     if (response) {
       responses[itemId] = response
     } else {
       delete responses[itemId]
     }
-    update({ responses })
+    saveInspection({ ...current, responses })
+
+    const item = formItems.get(itemId)
+    if (!item || item.failSeverity !== 'immediate') return
+
+    const isFailing = response?.result === 'fail'
+    // Raise the order once, on the commit that creates the failure.
+    if (isFailing && !wasFailing) {
+      setPendingStopUse((queue) => (queue.includes(itemId) ? queue : [...queue, itemId]))
+    }
+    if (!isFailing) {
+      setPendingStopUse((queue) => queue.filter((id) => id !== itemId))
+    }
+
+    /**
+     * The flag is recomputed from the record rather than toggled, so clearing a
+     * mis-tapped failure lifts the order and nothing is left stranded.
+     */
+    const stillOut =
+      Object.entries(responses).some(
+        ([id, entry]) =>
+          entry.result === 'fail' && formItems.get(id)?.failSeverity === 'immediate',
+      ) ||
+      state.defects.some(
+        (defect) =>
+          defect.liftId === current.liftId &&
+          defect.inspectionId !== current.id &&
+          defect.status === 'open' &&
+          defect.severity === 'immediate',
+      )
+    if (stillOut !== lift!.stopUseInForce) {
+      saveLift({ ...lift!, stopUseInForce: stillOut })
+    }
+  }
+
+  /** Explicit action, never a render: bring defects into line, then review. */
+  function openDefectReview() {
+    saveDefects(reconcileDefects(state.defects, inspection!, form, lift!, state.demoDate))
+    navigate(`/lift/${lift!.id}/inspection/defects`)
   }
 
   function goToSection(id: string) {
@@ -432,6 +483,17 @@ export default function InspectionForm() {
 
       {clauseItem && <ClauseSheet item={clauseItem} onClose={() => setClauseItem(null)} />}
 
+      {stopUseItem && (
+        <StopUseInterstitial
+          item={stopUseItem}
+          liftLabel={lift.label}
+          buildingName={buildingFor(lift).name}
+          officialNumber={lift.officialNumber}
+          recipients={notificationRecipients(buildingFor(lift), serviceCompanyFor(lift), true)}
+          onAcknowledge={() => setPendingStopUse((queue) => queue.slice(1))}
+        />
+      )}
+
       <div className="fixed inset-x-0 bottom-0 border-t border-rail bg-white">
         <div className="mx-auto max-w-[560px] px-4 py-3">
           {blocked && (
@@ -442,26 +504,40 @@ export default function InspectionForm() {
             </p>
           )}
           {next ? (
-            <button
-              type="button"
-              onClick={() => goToSection(next.id)}
-              disabled={blocked}
-              className="h-tap w-full rounded-card bg-signal text-17 font-medium text-white disabled:bg-rail disabled:text-slate"
-            >
-              Next section: {next.id}. {next.title}
-            </button>
+            <>
+              {/*
+                * The demo script walks A, then D, then E, and never reaches F,
+                * so grading has to be reachable from wherever the inspector is.
+                */}
+              {failureCount > 0 && (
+                <button
+                  type="button"
+                  onClick={openDefectReview}
+                  disabled={blocked}
+                  className="mb-2 h-tap w-full rounded-card border border-signal text-17 font-medium text-signal disabled:border-rail disabled:text-slate"
+                >
+                  Review {failureCount} {failureCount === 1 ? 'defect' : 'defects'}
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => goToSection(next.id)}
+                disabled={blocked}
+                className="h-tap w-full rounded-card bg-signal text-17 font-medium text-white disabled:bg-rail disabled:text-slate"
+              >
+                Next section: {next.id}. {next.title}
+              </button>
+            </>
           ) : (
             <>
               <button
                 type="button"
-                disabled
+                onClick={openDefectReview}
+                disabled={blocked}
                 className="h-tap w-full rounded-card bg-signal text-17 font-medium text-white disabled:bg-rail disabled:text-slate"
               >
                 Review defects
               </button>
-              <p className="mt-1 text-13 text-slate">
-                Scaffolding: defect review arrives at item 10.
-              </p>
             </>
           )}
         </div>

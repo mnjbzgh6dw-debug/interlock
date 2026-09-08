@@ -60,12 +60,26 @@ export function failedItemIds(inspection: Inspection): string[] {
     .sort((a, b) => a.localeCompare(b))
 }
 
+/**
+ * A defect becomes an obligation when the report that raised it is signed.
+ * Before that it exists, so the inspector's grading survives a refresh, but it
+ * is not yet anybody's dated obligation and must not appear as one.
+ */
+export function isIssued(state: AppState, defect: Defect): boolean {
+  const inspection = state.inspections.find((i) => i.id === defect.inspectionId)
+  return Boolean(inspection?.completedAt)
+}
+
+export function issuedDefects(state: AppState): Defect[] {
+  return state.defects.filter((defect) => isIssued(state, defect))
+}
+
 export function defectsFor(state: AppState, liftId: string): Defect[] {
-  return state.defects.filter((d) => d.liftId === liftId)
+  return issuedDefects(state).filter((d) => d.liftId === liftId)
 }
 
 export function openDefectsFor(state: AppState, liftId: string): Defect[] {
-  return state.defects.filter((d) => d.liftId === liftId && d.status === 'open')
+  return defectsFor(state, liftId).filter((d) => d.status === 'open')
 }
 
 /** Brief 7.1: overdue is an open defect whose due date has passed. */
@@ -88,16 +102,16 @@ export function stopUseDefects(state: AppState, liftId: string): Defect[] {
  */
 export function visibleDefects(state: AppState, persona: Persona): Defect[] {
   const lift = (id: string) => liftById(state, id)
-  if (persona.id === 'inspector') return state.defects
+  if (persona.id === 'inspector') return issuedDefects(state)
   if (persona.id === 'technician') {
-    return state.defects.filter(
+    return issuedDefects(state).filter(
       (d) =>
         d.responsibility === 'serviceCompany' &&
         lift(d.liftId)?.serviceCompanyId === persona.serviceCompanyId,
     )
   }
   const ids = persona.buildingIds ?? []
-  return state.defects.filter((d) => {
+  return issuedDefects(state).filter((d) => {
     const l = lift(d.liftId)
     return !!l && ids.includes(l.buildingId)
   })

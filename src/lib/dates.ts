@@ -25,6 +25,25 @@ export function daysBetween(from: string, to: string): number {
   return Math.round((parseDay(to).getTime() - parseDay(from).getTime()) / DAY_MS)
 }
 
+/** Whole months forward, clamped to the end of the target month. */
+export function addMonths(iso: string, months: number): string {
+  const d = parseDay(iso)
+  const day = d.getUTCDate()
+  d.setUTCDate(1)
+  d.setUTCMonth(d.getUTCMonth() + months)
+  const lastDay = new Date(
+    Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 0),
+  ).getUTCDate()
+  d.setUTCDate(Math.min(day, lastDay))
+  return toDay(d)
+}
+
+/**
+ * The statutory cycle in the seed data: every lift's next due date is two years
+ * after its last report.
+ */
+export const INSPECTION_INTERVAL_MONTHS = 24
+
 /** '2026-09-08' -> '8 September 2026'. */
 export function formatDay(iso: string): string {
   const d = parseDay(iso)

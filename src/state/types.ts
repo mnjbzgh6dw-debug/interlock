@@ -31,5 +31,6 @@ export type Action =
   | { type: 'setLift'; lift: Lift }
   | { type: 'putInspection'; inspection: Inspection }
   | { type: 'putDefect'; defect: Defect }
+  | { type: 'setDefects'; defects: Defect[] }
   | { type: 'storageFull' }
   | { type: 'reset' }
