@@ -87,7 +87,9 @@ Register these as Tailwind colour names so they appear in the code and stay disc
 
 `font-variant-numeric: tabular-nums` is set globally and overridden nowhere. Columns of readings must not jitter as they are typed.
 
-**IBM Plex Mono** in exactly two places, both genuinely code-like: the lift's official number, and the report verification code. Never for labels, never for decoration.
+**IBM Plex Mono** in exactly two places, both genuinely code-like: the lift's official number, and the report verification code. Never for labels, never for decoration. The verification code keeps mono wherever it appears, not only on the report.
+
+One exception, deliberate: the demo controls panel sets its own labels in mono. The panel is the operator's console, not part of the product, and the brief requires it to be unmistakable as such.
 
 | Size / weight | Use |
 |---|---|
@@ -119,7 +121,7 @@ Minimum 20px. Never stretch, recolour outside the two variants, or add effects. 
 
 ### 4.5 Layout laws
 
-- Single column. Left aligned. Never centre body content.
+- Single column. Left aligned. Never centre body content. These are the app's laws, on a phone. The report in section 11 is a printed document and is exempt: it uses two columns for the identity blocks and right-aligns values against their labels, which is the spec-sheet convention. The lift detail's identity block follows the same convention on screen.
 - Minimum tap target 48×48px. Gloves.
 - Primary action in a fixed bottom bar, thumb reach.
 - Explanatory text under 70 characters per line.
@@ -146,6 +148,7 @@ Plain, active, verb-first. "Start inspection", not "Initiate inspection". An act
 - Photos: `<input type="file" accept="image/*" capture="environment">`.
 - QR: the `qrcode` npm package, rendered to canvas.
 - **Deploy on day one.** Netlify or Vercel. Do this as soon as the register works, not at the end. It removes the worst demo risk, which is a laptop that will not project, and it means every later checkpoint is a link you can open on your phone from anywhere.
+  - **What happened instead:** deployed at the end of Tier 1, to GitHub Pages rather than Netlify or Vercel, because that needed no interactive login. Live at `https://mnjbzgh6dw-debug.github.io/interlock/`, published from the `gh-pages` branch by `npm run deploy`. Pages has no rewrite rules, so `404.html` is a copy of `index.html`: deep links such as `/verify/:code` load correctly but return a 404 status. Vite's `base` is set for `build` only, so dev stays at the root.
 
 ### 5.1 Cross-window sync
 
@@ -154,6 +157,8 @@ Plain, active, verb-first. "Start inspection", not "Initiate inspection". An act
 **The outbound push must be gated on `navigator.onLine`, and flushed on the `online` event.** `BroadcastChannel` works perfectly well offline, so without this gate, real airplane mode changes nothing, the defect appears on the technician window instantly, and the sync beat in the script is a lie. With the gate, airplane mode genuinely queues writes and restoring signal genuinely flushes them. Roughly ten lines. Do not skip it.
 
 Show queue state honestly: a small `open`-coloured indicator reading the queued write count while offline, and a `verified` "synced" confirmation when it flushes. An inspection captured offline carries `capturedOffline: true` and shows a "captured offline, synced at HH:MM" line on the report.
+
+Persona does **not** cross between windows. Two windows are two people, the inspector and the technician, so each keeps its own. Everything else crosses, including the demo date, so advancing to Day 31 moves both. The `storage` event is deliberately not listened to: both windows share `localStorage`, so reacting to it would carry state across the gate and make airplane mode meaningless. The consequence is that a hard refresh of the second window mid-demo picks up the shared store early.
 
 There is no server. There is no second-device sync. Say so in the room.
 
@@ -168,6 +173,8 @@ Persistent switcher in the demo controls. No passwords, no login screen.
 | Building owner | N. Mokoena, facilities manager, Kestrel Property Holdings | **All** defects on lifts in `bld-kestrel`, regardless of responsibility, with the responsible party shown on each. Can close only those assigned to `owner`. Sees their reports and the portfolio exposure view. |
 
 The owner scope is deliberately wider than the technician's. An owner is liable for the machine whoever is fixing it, and the portfolio screen cannot show total exposure otherwise.
+
+The inspector lands on the register. The technician and the owner land on their worklist: neither starts inspections, so a register of lifts they cannot act on is the wrong first screen.
 
 A regulator appears only as a recipient in distribution lists and as the audience for a stop-use notification. Do not build a regulator screen.
 
@@ -265,6 +272,12 @@ type Defect = {
 
 Overdue is `status === 'open' && dueDate < demoDate`.
 
+**When a defect record exists, and when it becomes an obligation.** Records are created when the inspector opens defect review, so a responsibility override survives a refresh. They are not obligations until the report is signed: every view that lists obligations counts only defects whose inspection has a `completedAt`. That is what makes the 09:10 sync beat land on submit rather than on grading.
+
+**Issuing a report restarts the compliance clock.** Submit sets the lift's `lastReportDate` to the demo date and `nextDueDate` 24 months on, which is the cycle every lift in the seed uses. Without it a lift reads "25 days overdue" immediately after being inspected, which is the first thing anyone would notice.
+
+**Closing the last open `immediate` defect on a lift clears `stopUseInForce`.** Nothing moves until it's closed, and once it's closed the lift is released. The flag is recomputed from the record rather than toggled, so clearing a mis-tapped failure also lifts the order.
+
 ### 7.2 Reminders are computed, never stored
 
 Reminders are a pure function of `(defect, demoDate)`. Nothing writes a reminder. Rendering a view must never mutate state, or reminders duplicate on every render, every persona switch and every date change, and the history shown at the Day 31 beat becomes garbage.
@@ -276,6 +289,10 @@ Schedule, for `days30` and `days90` defects only:
 - Every 7 days after the due date, up to the demo date
 
 Return the computed list, most recent first, and render it inline on the defect. `immediate` defects are not chased on a schedule — they are notified once, at the moment of the stop-use order. `nextInspection` defects are never chased.
+
+Recipients on each reminder: the responsible party, the building owner, and Cape Vertical Inspections. The owner is on every reminder because they are liable whoever is fixing it.
+
+Chasing stops at closure, not at the demo date, so a defect closed late shows the reminders that actually fired and no more.
 
 ### 7.3 Persistence rules
 
@@ -342,6 +359,8 @@ Tapping a lift with `formId: null` shows a scope statement, not an error: "Goods
 | `lift-b2` | 2019-05-16, 2021-06-04, 2023-06-11, 2025-06-18 |
 | `lift-w1` | 2021-02-20, 2022-11-06, 2024-11-02 |
 
+`lift-b3` is not in the history table above, but its `lastReportDate` is 2025-10-30, so it carries the single record that date implies. Inspector names for entries the table leaves unnamed are assigned from the three known inspectors, chronologically.
+
 **Open defects, both on `lift-k2`, from the 2026-07-20 inspection by J. Marais**
 
 | id | Item | Description | Severity | Responsibility | Raised | Due | Status |
@@ -369,6 +388,8 @@ Clause references read `Cl. 5.4.2` with no standard named. Each carries two or t
 - **Submit is permitted with items unanswered.** No blocking confirmation. Use the demo control in section 12 to fill the remainder before sign-off so the printed certificate is complete.
 - **Photo-required-on-fail is the one hard gate.** An item with `photoRequiredOnFail` that has been failed cannot be left until a photo is attached.
 - **Measurements evaluate on commit, not on keystroke.** Blur, or an explicit done action. Typing `50` on the way to `500`, or `1` on the way to `12.4`, must not fire a stop-use interstitial mid-keystroke.
+- **A `dateCheck` item records the date of the last certified test** and fails when that date is more than the stated interval ago, or is in the future. Judged against the demo date, not today. E4's interval is 12 months.
+- **An out-of-range measurement result is not overridable.** Retyping the value is the only way to change it, because the range is the rule.
 - **The stop-use interstitial fires on commit of an `immediate` failure**, once, and sets `stopUseInForce` on the lift.
 - Each section ends with an inspector signature pad.
 
@@ -422,7 +443,9 @@ Format: `id` · text · fail description · type · expected · clause · severi
 
 Four of these carry the demo. Build those brilliantly rather than nine adequately: register, inspection form, stop-use interstitial, defect worklist.
 
-1. **Lift register** — landing screen. Grouped by building. Each row: label, official number in Plex Mono, type icon, and a compliance clock reading days to next due or days overdue. The clock is the hero element; lead with it, not with summary tiles. Search by building name or official number. A lift with `stopUseInForce` carries a `stop`-coloured left border and reads as not for use.
+1. **Lift register** — landing screen. Grouped by building. Each row: label, official number in Plex Mono, type icon, and a compliance clock reading days to next due or days overdue. The clock is the hero element; lead with it, not with summary tiles. Search by building name, official number, or the lift's label: typing "goods" and getting nothing is a dead end in front of an audience.
+
+**The clock reads days inside 90 days and months beyond it**, and overdue is always in days. Six of the eight seeded lifts sit more than a year out, where "Due in 681 days" is a number nobody converts while holding a phone, which left the hero element doing no work on most of the register. Ninety days is the longest horizon the form grades to. The exact date stays in the lift's identity block. A lift with `stopUseInForce` carries a `stop`-coloured left border and reads as not for use.
 2. **Lift detail** — full identity block, inspection history with verification codes, open and closed defects. Primary action: Start inspection. QR entry lands here.
 3. **Inspection form** — per section 9.
 4. **Stop-use interstitial** — full-bleed `stop`. States plainly that no person may be conveyed until the defect is rectified. Lists who is being notified, regulator included. One action: Acknowledge. The single place to spend visual boldness; everything else stays quiet so this lands.
@@ -430,8 +453,8 @@ Four of these carry the demo. Build those brilliantly rather than nine adequatel
 6. **Sign off** — summary, inspector identity and registration, final signature pad, submit.
 7. **Report** — see section 11.
 8. **Distribution** — four recipients with recorded timestamps, clearly labelled as simulated. Print / save PDF.
-9. **Defect worklist** — technician and owner personas, scoped per section 6, overdue first. Open one, attach evidence photo, sign, close. Computed reminder history rendered inline on the defect. There is no separate outbox screen: a screen full of fake emails invites scrutiny of the fake emails.
-10. **Portfolio exposure** — owner persona. Kestrel's three lifts, one overdue inspection, two open defects one of which is overdue, and any stop-use order in force. Whoever in the room is thinking about who pays is thinking about portfolio risk, not checklists. This is where an inspector tool becomes a business.
+9. **Defect worklist** — technician and owner personas, scoped per section 6, overdue first. Open one, attach evidence photo, sign, close. Both a photograph and a signature are required to close: the loop is worth nothing if an obligation can be ticked off without proof. Computed reminder history rendered inline on the defect. There is no separate outbox screen: a screen full of fake emails invites scrutiny of the fake emails.
+10. **Portfolio exposure** — owner persona. Kestrel's three lifts, with whatever is actually true at the demo date. The figures quoted here — one overdue inspection, two open defects one of which is overdue — describe the **seeded** state, and the demo script changes exactly those facts before you reach this screen: it inspects Lift 1, which resets its clock, and closes the cracked mirror. At Day 45 after a scripted run the honest figures are no overdue inspections, four open obligations all overdue, and one lift out of service. The screen reports live truth, so it can never be caught disagreeing with the story the room just watched. The number attached to the exposure is counts and days, not currency: there is no cost data in this model and an invented rand figure is fake precision. Whoever in the room is thinking about who pays is thinking about portfolio risk, not checklists. This is where an inspector tool becomes a business.
 11. **Verify** — `/verify/:code`. Minimal public record, no chrome, no nav.
 
 ## 11. The report
@@ -444,15 +467,23 @@ It must not look like an app screen with a download button. This industry's curr
 - Inspector name, registration number, rendered signature per section and final signature, dated.
 - Defect schedule with severity, responsibility and due dates.
 - "Captured offline, synced at HH:MM" where applicable.
-- Verification code and QR, footer with page `n of m`.
-- The placeholder watermark.
+- Verification code and QR, and a footer on every page carrying the building, lift, official number, verification code and date.
+- The placeholder notice, as the same amber banner the form carries. Not a diagonal watermark.
 - A dedicated print stylesheet: A4, hairline rules, no interactive chrome, page-break control so sections do not split mid-item.
+
+**Measured on real A4 proofs**, rendered from the deployed site with headless Chrome:
+
+- A complete certificate is 4 pages. `break-inside: avoid` holds on every item row and defect row, and `break-after: avoid` on every section header, so no item splits across a page.
+- **Page `n of m` is not in the document.** Chrome supports neither `@page` margin boxes nor CSS page counters, and section 5 rules out a PDF library. Leave "Headers and footers" ticked in the print dialog and Chrome supplies page numbers. The in-document footer carries the identity instead, which is the part that matters in a steel cabinet.
+- **The running footer sits tight to the last line on a page that fills.** A `position: fixed` footer reserves no space in the flow. Three fixes were each proofed on A4 and each traded the problem for a worse one: a negative offset into the page margin is clipped away entirely, and `display: table-footer-group` reserves the space correctly but stops painting its contents. The current version is the best of the three. A gap of a few points, not an overlap, on a full page.
 
 **Demo the certificate on the projected desktop window, not the phone.** iOS Safari's print sheet is a thumbnail with no page-break fidelity, which makes the one beat that has to look like paper the weakest thing on that device. Phone for the pit, laptop for the certificate.
 
 ## 12. Demo controls
 
 Slide-over panel, always reachable, visually distinct from the app so nobody mistakes it for a feature.
+
+One exception: the trigger is hidden on the report and the sticker sheet. Those two surfaces exist to not look like an app, and a floating operator pill in the corner of the certificate is the most app-like thing in that frame at the moment the beat has to land as paper. It returns as soon as you navigate off them.
 
 - **Persona switch** — the three roles.
 - **Demo date** — defaults 2026-09-08. Changing it recalculates every overdue state and recomputes reminders. This is how the escalation beat happens live instead of in thirty days.
