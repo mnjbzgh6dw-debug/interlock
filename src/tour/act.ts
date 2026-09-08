@@ -38,10 +38,12 @@ export async function performAct(act: TourAct, io: Io): Promise<void> {
   await io.sleep(0)
   if (!io.alive()) return
   /**
-   * A real blur, not a dispatched event: React wires onBlur to focusout, which
-   * a hand-made non-bubbling 'blur' event does not trigger. It also closes the
-   * phone keyboard, which would otherwise shift the visual viewport under the
-   * card while the step is being shown.
+   * Both: `blur()` closes the phone keyboard, which would otherwise shift the
+   * visual viewport under the card, and the explicit focusout is what React
+   * actually listens to for onBlur. The event matters on its own because
+   * `focus()` does not take in a tab that is not focused, which leaves `blur()`
+   * a no-op and the measurement never committed.
    */
   input.blur()
+  input.dispatchEvent(new FocusEvent('focusout', { bubbles: true }))
 }

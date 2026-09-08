@@ -13,6 +13,8 @@ import { createInspection } from '../lib/inspection'
 import { dueDateFor } from '../lib/dates'
 import { defectIdFor } from '../lib/defects'
 import pitWater from '../assets/photos/def-001-pit-water.jpg'
+import marais from '../assets/signatures/j-marais.svg'
+import botha from '../assets/signatures/m-botha.svg'
 import type { PersistedState } from '../state/types'
 import type { Precondition } from './types'
 
@@ -28,7 +30,16 @@ export const stopUse: Precondition = { key: 'stop-use', build: stopUseInForce }
 const items = formPassengerA.sections.flatMap((section) => section.items)
 const itemById = (id: string) => items.find((item) => item.id === id)!
 
-/** A fresh inspection on Kestrel Lift 1, with the given responses already in. */
+/**
+ * A fresh inspection on Kestrel Lift 1, with the given responses already in.
+ *
+ * The id and verification code are fixed rather than generated. `createInspection`
+ * derives both from the clock and a random, which would mean a step whose route
+ * contains the id could never match the state built when that step runs.
+ */
+export const TOUR_INSPECTION_ID = 'insp-tour-k1'
+export const TOUR_VERIFICATION_CODE = 'IL-K1-0809-T0UR'
+
 function inspectionWith(responses: Record<string, { result: 'pass' | 'fail'; value?: string; photo?: string }>): PersistedState {
   const state = base()
   const lift = state.lifts.find((entry) => entry.id === 'lift-k1')!
@@ -38,6 +49,8 @@ function inspectionWith(responses: Record<string, { result: 'pass' | 'fail'; val
     state.demoDate,
     false,
   )
+  inspection.id = TOUR_INSPECTION_ID
+  inspection.verificationCode = TOUR_VERIFICATION_CODE
   inspection.responses = responses
   state.inspections = [...state.inspections, inspection]
   return state
@@ -127,10 +140,89 @@ export const readyToSign: Precondition = {
 }
 
 /**
- * Carry the previous step's state forward untouched. A step group used inside
- * the comprehensive tour uses this so it does not reset what the group before
- * it just built.
+ * A report issued today on Kestrel Lift 1: signed, distributed, three defects
+ * raised and the lift out of service. What the demo script produces by 08:56,
+ * and the starting point for everything downstream of the certificate.
  */
-export function carryOn(key: string): Precondition {
-  return { key, build: base }
+export const issuedReport: Precondition = {
+  key: 'issued-report',
+  build: () => {
+    const state = readyToSign.build()
+    const inspection = state.inspections[state.inspections.length - 1]
+    const at = `${state.demoDate}T08:56:00+02:00`
+    inspection.completedAt = at
+    inspection.finalSignature = marais
+    inspection.sectionSignatures = Object.fromEntries(
+      formPassengerA.sections.map((section) => [section.id, marais]),
+    )
+    inspection.distributedTo = [
+      { recipient: 'N. Mokoena, n.mokoena@kestrelprop.example', role: 'Building owner', sentAt: at },
+      { recipient: 'dispatch@vertexlifts.example', role: 'Lift company', sentAt: at },
+      { recipient: 'records@capevertical.example', role: 'Inspection service provider', sentAt: at },
+      { recipient: 'lifts@labour.example', role: 'Regulator', sentAt: at },
+    ]
+    // Issuing a report restarts the clock, per brief 7.1.
+    state.lifts = state.lifts.map((lift) =>
+      lift.id === 'lift-k1'
+        ? { ...lift, lastReportDate: state.demoDate, nextDueDate: '2028-09-08' }
+        : lift,
+    )
+    return state
+  },
 }
+
+/** The same report, with its car-mirror defect closed by the technician. */
+export const closedDefect: Precondition = {
+  key: 'closed-defect',
+  build: () => {
+    const state = issuedReport.build()
+    const inspection = state.inspections[state.inspections.length - 1]
+    state.defects = state.defects.map((defect) =>
+      defect.inspectionId === inspection.id && defect.itemId === 'D1'
+        ? {
+            ...defect,
+            status: 'closed' as const,
+            evidencePhoto: pitWater,
+            closureSignature: botha,
+            closedBy: 'N. Mokoena, Kestrel Property Holdings',
+            closedAt: `${state.demoDate}T14:20:00+02:00`,
+          }
+        : defect,
+    )
+    return state
+  },
+}
+
+/** Day 31: nobody fixed the pit, and the reminders have been firing. */
+export const day31: Precondition = {
+  key: 'day-31',
+  build: base,
+  demoDate: '2026-10-09',
+}
+
+/** Day 45: the owner's view of what the portfolio is carrying. */
+export const day45: Precondition = {
+  key: 'day-45',
+  build: issuedReport.build,
+  demoDate: '2026-10-23',
+}
+
+/**
+ * Mid-inspection with no signal. The queued count cannot be seeded, because it
+ * only rises when the push effect sees a changed payload while offline, so the
+ * tour has to make a real write to move it. Faking it is impossible, which is
+ * the same honesty the navigator.onLine gate exists for.
+ */
+export const offlineCapture: Precondition = {
+  key: 'offline-capture',
+  build: midInspection,
+  connection: 'offline',
+}
+
+/**
+ * Note on continuing: there is no separate "carry on" precondition. A group
+ * reuses the same precondition object for every one of its steps, and the
+ * engine skips the load when the key already matches. That way a group works
+ * standalone, where its first step loads the state cold, and inside a long tour,
+ * where the group before it has already applied the same key.
+ */

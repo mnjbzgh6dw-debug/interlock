@@ -4,7 +4,7 @@
  */
 
 import { ANCHOR } from '../anchors'
-import { carryOn, readyToGrade } from '../preconditions'
+import { readyToGrade } from '../preconditions'
 import type { TourStep } from '../types'
 
 export function defectReviewSteps(liftId = 'lift-k1'): TourStep[] {
@@ -21,7 +21,7 @@ export function defectReviewSteps(liftId = 'lift-k1'): TourStep[] {
     },
     {
       ...base,
-      precondition: carryOn('ready-to-grade'),
+      precondition: readyToGrade,
       id: 'review-dates',
       anchor: ANCHOR.reviewDefect('D1'),
       title: 'Every obligation has a date',
@@ -29,7 +29,7 @@ export function defectReviewSteps(liftId = 'lift-k1'): TourStep[] {
     },
     {
       ...base,
-      precondition: carryOn('ready-to-grade'),
+      precondition: readyToGrade,
       id: 'review-responsibility',
       anchor: ANCHOR.reviewResponsibility('D1'),
       title: 'Who carries it, named',

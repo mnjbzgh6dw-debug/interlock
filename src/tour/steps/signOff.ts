@@ -1,7 +1,7 @@
 /** Sign off. What turns a walked checklist into an issued certificate. */
 
 import { ANCHOR } from '../anchors'
-import { carryOn, readyToSign } from '../preconditions'
+import { readyToSign } from '../preconditions'
 import type { TourStep } from '../types'
 
 export function signOffSteps(liftId = 'lift-k1'): TourStep[] {
@@ -18,7 +18,7 @@ export function signOffSteps(liftId = 'lift-k1'): TourStep[] {
     },
     {
       ...base,
-      precondition: carryOn('ready-to-sign'),
+      precondition: readyToSign,
       id: 'sign-off-inspector',
       anchor: ANCHOR.signOffInspector,
       title: 'A named person with a registration number',
@@ -26,7 +26,7 @@ export function signOffSteps(liftId = 'lift-k1'): TourStep[] {
     },
     {
       ...base,
-      precondition: carryOn('ready-to-sign'),
+      precondition: readyToSign,
       id: 'sign-off-signature',
       anchor: ANCHOR.signOffSignature,
       title: 'The one thing that is required',

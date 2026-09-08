@@ -11,6 +11,7 @@ import { AppHeader } from '../components/AppHeader'
 import { formatDay } from '../lib/dates'
 import { buildingFor, liftById } from '../state/selectors'
 import { useStore } from '../state/useStore'
+import { ANCHOR, tourAnchor } from '../tour/anchors'
 
 export default function Distribution() {
   const { inspectionId } = useParams()
@@ -51,7 +52,10 @@ export default function Distribution() {
             This report has no distribution recorded. Submit an inspection to issue one.
           </p>
         ) : (
-          <ul className="mt-5 divide-y divide-rail border-y border-rail">
+          <ul
+            {...tourAnchor(ANCHOR.distributionList)}
+            className="mt-5 divide-y divide-rail border-y border-rail"
+          >
             {inspection.distributedTo.map((entry) => (
               <li key={entry.role} className="py-3">
                 <p className="text-17">{entry.role}</p>
@@ -64,7 +68,10 @@ export default function Distribution() {
           </ul>
         )}
 
-        <p className="mt-4 rounded-card border border-rail bg-white p-3 text-15">
+        <p
+          {...tourAnchor(ANCHOR.distributionSimulated)}
+          className="mt-4 rounded-card border border-rail bg-white p-3 text-15"
+        >
           Simulated. Distribution is recorded in this app only, and nothing was sent to any
           recipient.
         </p>

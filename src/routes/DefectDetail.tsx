@@ -31,6 +31,7 @@ import {
   serviceCompanyFor,
 } from '../state/selectors'
 import { useStore } from '../state/useStore'
+import { ANCHOR, tourAnchor } from '../tour/anchors'
 
 export default function DefectDetail() {
   const { defectId } = useParams()
@@ -150,7 +151,10 @@ export default function DefectDetail() {
           </div>
         )}
 
-        <dl className="mt-4 divide-y divide-rail rounded-card border border-rail bg-white px-4">
+        <dl
+          {...tourAnchor(ANCHOR.defectIdentity)}
+          className="mt-4 divide-y divide-rail rounded-card border border-rail bg-white px-4"
+        >
           <div className="flex justify-between gap-4 py-2">
             <dt className="text-13 font-medium text-slate">Checklist item</dt>
             <dd className="text-right text-17">
@@ -185,7 +189,7 @@ export default function DefectDetail() {
         </dl>
 
         {defect.raisedPhoto && (
-          <section className="mt-6">
+          <section className="mt-6" {...tourAnchor(ANCHOR.defectRaisedPhoto)}>
             <h2 className="text-20 font-medium">Photograph at inspection</h2>
             <img
               src={defect.raisedPhoto}
@@ -196,7 +200,7 @@ export default function DefectDetail() {
         )}
 
         {/* Brief 7.2: computed on the way in, rendered inline, never stored. */}
-        <section className="mt-6">
+        <section className="mt-6" {...tourAnchor(ANCHOR.defectReminders)}>
           <h2 className="text-20 font-medium">Reminder history</h2>
           {reminders.length === 0 ? (
             <p className="mt-1 text-17">
@@ -260,7 +264,7 @@ export default function DefectDetail() {
             )}
           </section>
         ) : mine ? (
-          <section className="mt-6">
+          <section className="mt-6" {...tourAnchor(ANCHOR.defectClosure)}>
             <h2 className="text-20 font-medium">Close this defect</h2>
             <p className="mt-1 text-17">
               Attach a photograph of the rectified condition and sign.
@@ -291,7 +295,10 @@ export default function DefectDetail() {
       </main>
 
       {defect.status === 'open' && mine && (
-        <div className="fixed inset-x-0 bottom-0 border-t border-rail bg-white">
+        <div
+          {...tourAnchor(ANCHOR.defectAction)}
+          className="fixed inset-x-0 bottom-0 border-t border-rail bg-white"
+        >
           <div className="mx-auto max-w-[560px] px-4 py-3">
             {!ready && (
               <p className="mb-2 text-15 text-slate">

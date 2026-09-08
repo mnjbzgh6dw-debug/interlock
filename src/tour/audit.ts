@@ -53,6 +53,14 @@ async function withDeadline<T>(work: Promise<T>): Promise<T | 'stalled'> {
 
 export async function runAudit(store: () => Store, navigate: Navigate, base: string) {
   const rows: AuditRow[] = []
+  /**
+   * Published as it goes, not at the end. With twenty tours the walk takes
+   * minutes, and a problem in the third tour should be visible without waiting
+   * for the twentieth.
+   */
+  const scope = window as unknown as { __tourAudit?: AuditRow[]; __tourAuditDone?: boolean }
+  scope.__tourAudit = rows
+  scope.__tourAuditDone = false
 
   for (const tour of tours) {
     let appliedKey = ''
@@ -112,7 +120,8 @@ export async function runAudit(store: () => Store, navigate: Navigate, base: str
       }
 
       console.log(`[audit] ${tour.id}/${step.id} route=${step.route}`)
-      const wanted = step.waitFor ?? step.anchor
+      // Same ordering as the engine: before an act, only the control matters.
+      const wanted = step.act ? step.act.anchor : step.waitFor ?? step.anchor
       const found = wanted ? await waitForAnchor(wanted, io, 700) : null
 
       let result: AuditRow['result'] = 'ok'
@@ -121,8 +130,9 @@ export async function runAudit(store: () => Store, navigate: Navigate, base: str
       } else if (step.act) {
         await performAct(step.act, io)
         await sleep(120)
+        const target = step.waitFor ?? step.anchor
         if (step.expect && !step.expect(store().state)) result = 'expectation failed'
-        else if (step.anchor && !(await waitForAnchor(step.anchor, io, 700))) {
+        else if (target && !(await waitForAnchor(target, io, 700))) {
           result = 'anchor missing'
         }
       }
@@ -139,6 +149,21 @@ export async function runAudit(store: () => Store, navigate: Navigate, base: str
     }
   }
 
+  /**
+   * A step that hit its deadline can still finish afterwards and push a second
+   * row, so keep the first verdict per step: it is the one the viewer would
+   * have experienced.
+   */
+  const seen = new Set<string>()
+  const unique = rows.filter((row) => {
+    const key = `${row.tour}/${row.index}`
+    if (seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+  rows.length = 0
+  rows.push(...unique)
+
   const bad = rows.filter((row) => row.result !== 'ok')
   console.log(
     `[tour audit] ${tours.length} tours, ${rows.length} steps, ${bad.length} problem${
@@ -146,7 +171,6 @@ export async function runAudit(store: () => Store, navigate: Navigate, base: str
     }`,
   )
   if (bad.length) console.table(bad)
-  // Left on window so a test harness can read it without scraping the console.
-  ;(window as unknown as { __tourAudit?: AuditRow[] }).__tourAudit = rows
+  scope.__tourAuditDone = true
   return rows
 }

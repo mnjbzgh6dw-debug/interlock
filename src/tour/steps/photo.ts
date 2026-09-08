@@ -1,7 +1,7 @@
 /** Photographic evidence, and the one hard gate in the whole form. */
 
 import { ANCHOR } from '../anchors'
-import { carryOn, pitPhotographed } from '../preconditions'
+import { pitPhotographed } from '../preconditions'
 import type { TourStep } from '../types'
 
 export function photoSteps(liftId = 'lift-k1'): TourStep[] {
@@ -19,7 +19,7 @@ export function photoSteps(liftId = 'lift-k1'): TourStep[] {
     },
     {
       ...base,
-      precondition: carryOn('d1-photographed'),
+      precondition: pitPhotographed,
       id: 'photo-fail',
       anchor: ANCHOR.formItem('D1'),
       title: 'Water in the pit',
@@ -27,7 +27,7 @@ export function photoSteps(liftId = 'lift-k1'): TourStep[] {
     },
     {
       ...base,
-      precondition: carryOn('d1-photographed'),
+      precondition: pitPhotographed,
       id: 'photo-evidence',
       anchor: ANCHOR.formItemPhoto('D1'),
       title: 'The photograph is part of the record',
@@ -35,7 +35,7 @@ export function photoSteps(liftId = 'lift-k1'): TourStep[] {
     },
     {
       ...base,
-      precondition: carryOn('d1-photographed'),
+      precondition: pitPhotographed,
       id: 'photo-gate',
       anchor: ANCHOR.formAction,
       title: 'The one thing the form will not let you skip',

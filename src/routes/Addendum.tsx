@@ -22,6 +22,7 @@ import { formatDay } from '../lib/dates'
 import { reminderRecipients, remindersFor } from '../lib/reminders'
 import { buildingFor, isOverdue, liftById, serviceCompanyFor } from '../state/selectors'
 import { useStore } from '../state/useStore'
+import { ANCHOR, tourAnchor } from '../tour/anchors'
 
 export default function Addendum() {
   const { inspectionId } = useParams()
@@ -112,7 +113,7 @@ export default function Addendum() {
           </p>
         </div>
 
-        <section className="report-section mt-7">
+        <section className="report-section mt-7" {...tourAnchor(ANCHOR.addendumClosed)}>
           <h2 className="border-b border-shaft pb-1 text-20 font-medium">Closed defects</h2>
           {closed.length === 0 ? (
             <p className="mt-2 text-15">
@@ -202,7 +203,7 @@ export default function Addendum() {
         </section>
 
         {outstanding.length > 0 && (
-          <section className="report-section mt-7">
+          <section className="report-section mt-7" {...tourAnchor(ANCHOR.addendumOutstanding)}>
             <h2 className="border-b border-shaft pb-1 text-20 font-medium">Still outstanding</h2>
             <table className="mt-2 w-full border-collapse text-left">
               <thead>

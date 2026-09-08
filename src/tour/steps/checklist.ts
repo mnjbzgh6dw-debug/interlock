@@ -5,14 +5,14 @@
  */
 
 import { ANCHOR } from '../anchors'
-import { carryOn, midInspectionOnK1 } from '../preconditions'
+import { midInspectionOnK1 } from '../preconditions'
 import type { TourStep } from '../types'
 
 export function checklistSteps(liftId = 'lift-k1'): TourStep[] {
   const route = `/lift/${liftId}/inspection`
   const base = { route, persona: 'inspector' as const }
   const started = { ...base, precondition: midInspectionOnK1 }
-  const going = { ...base, precondition: carryOn('mid-inspection') }
+  const going = { ...base, precondition: midInspectionOnK1 }
   return [
     {
       ...started,

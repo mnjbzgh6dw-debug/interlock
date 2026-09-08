@@ -19,6 +19,7 @@ import { formatDay } from '../lib/dates'
 import { displayValue } from '../lib/inspection'
 import { buildingFor, inspectionsFor, liftById, serviceCompanyFor } from '../state/selectors'
 import { useStore } from '../state/useStore'
+import { ANCHOR, tourAnchor } from '../tour/anchors'
 import type { Inspection, Lift, ResponseResult } from '../types'
 
 const RESULT_TEXT: Record<ResponseResult, string> = {
@@ -39,7 +40,10 @@ function Row({ label, value, mono }: { label: string; value: string; mono?: bool
 function Letterhead({ inspection }: { inspection: Inspection }) {
   const provider = personaById.get('inspector')!
   return (
-    <header className="report-block flex items-start justify-between gap-6 border-b-2 border-shaft pb-4">
+    <header
+      {...tourAnchor(ANCHOR.reportLetterhead)}
+      className="report-block flex items-start justify-between gap-6 border-b-2 border-shaft pb-4"
+    >
       <div className="flex items-center gap-3">
         <Logo size={40} variant="reversed" labelled={false} />
         <div>
@@ -120,6 +124,7 @@ export default function Report() {
             {defects.some((defect) => defect.status === 'closed') && (
               <Link
                 to={`/inspection/${inspection.id}/addendum`}
+                {...tourAnchor(ANCHOR.reportAddendumLink)}
                 className="text-15 text-signal underline"
               >
                 Closure addendum
@@ -133,6 +138,7 @@ export default function Report() {
             </Link>
             <button
               type="button"
+              {...tourAnchor(ANCHOR.reportPrint)}
               onClick={() => window.print()}
               className="h-tap rounded-card bg-signal px-4 text-17 font-medium text-white"
             >
@@ -147,7 +153,10 @@ export default function Report() {
 
         <h1 className="report-block mt-5 text-31 font-semibold">{form.title}</h1>
 
-        <p className="report-block mt-3 border-y border-open/40 bg-open-tint px-3 py-2 text-13 text-open">
+        <p
+          {...tourAnchor(ANCHOR.reportBanner)}
+          className="report-block mt-3 border-y border-open/40 bg-open-tint px-3 py-2 text-13 text-open"
+        >
           {PLACEHOLDER_NOTICE}
         </p>
 
@@ -206,7 +215,7 @@ export default function Report() {
               )}
             </div>
           </section>
-          <section className="report-block">
+          <section className="report-block" {...tourAnchor(ANCHOR.reportVerification)}>
             <h2 className="text-13 font-medium text-slate">Verification</h2>
             <div className="mt-1 flex items-start gap-3">
               <VerificationQr url={verifyUrl} />
@@ -222,7 +231,11 @@ export default function Report() {
 
         {usesLoadedForm ? (
           form.sections.map((section) => (
-            <section key={section.id} className="report-section mt-6">
+            <section
+              key={section.id}
+              {...tourAnchor(ANCHOR.reportSection(section.id))}
+              className="report-section mt-6"
+            >
               <h2 className="border-b border-shaft pb-1 text-20 font-medium">
                 {section.id}. {section.title}
               </h2>
@@ -301,7 +314,7 @@ export default function Report() {
           </section>
         )}
 
-        <section className="report-section mt-7">
+        <section className="report-section mt-7" {...tourAnchor(ANCHOR.reportDefects)}>
           <h2 className="border-b border-shaft pb-1 text-20 font-medium">Defect schedule</h2>
           {defects.length === 0 ? (
             <p className="mt-2 text-15">No defects were recorded on this inspection.</p>
@@ -359,7 +372,7 @@ export default function Report() {
           )}
         </section>
 
-        <section className="report-signature mt-8">
+        <section className="report-signature mt-8" {...tourAnchor(ANCHOR.reportCertification)}>
           <h2 className="text-13 font-medium text-slate">Certification</h2>
           <p className="mt-1 text-15">
             I certify that the equipment described above was inspected on the date shown and that

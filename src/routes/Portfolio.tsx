@@ -32,6 +32,7 @@ import {
   visibleDefects,
 } from '../state/selectors'
 import { useStore } from '../state/useStore'
+import { ANCHOR, tourAnchor } from '../tour/anchors'
 import type { ComplianceTone } from '../lib/compliance'
 
 function Figure({
@@ -82,7 +83,7 @@ export default function Portfolio() {
           {persona.organisation} &middot; {formatDay(state.demoDate)}
         </p>
 
-        <div className="mt-4 grid grid-cols-2 gap-3">
+        <div {...tourAnchor(ANCHOR.portfolioFigures)} className="mt-4 grid grid-cols-2 gap-3">
           <Figure
             value={String(outOfService.length)}
             label={outOfService.length === 1 ? 'Lift out of service' : 'Lifts out of service'}
@@ -118,7 +119,7 @@ export default function Portfolio() {
         </p>
 
         {/* Fork three from section 15, made concrete: who carries this. */}
-        <section className="mt-7">
+        <section className="mt-7" {...tourAnchor(ANCHOR.portfolioWhoCarries)}>
           <h2 className="text-20 font-medium">Who carries it</h2>
           <ul className="mt-2 divide-y divide-rail border-y border-rail">
             <li className="flex items-baseline justify-between gap-4 py-2">
@@ -186,7 +187,7 @@ export default function Portfolio() {
           </section>
         ))}
 
-        <section className="mt-7">
+        <section className="mt-7" {...tourAnchor(ANCHOR.portfolioObligations)}>
           <h2 className="text-20 font-medium">Open obligations</h2>
           {open.length === 0 ? (
             <p className="mt-1 text-17">

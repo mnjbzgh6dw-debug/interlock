@@ -11,6 +11,7 @@ import { Logo } from '../components/Logo'
 import { formatDay } from '../lib/dates'
 import { buildingFor, inspectionByCode, liftById, openDefectsFor } from '../state/selectors'
 import { useStore } from '../state/useStore'
+import { ANCHOR, tourAnchor } from '../tour/anchors'
 
 export default function Verify() {
   const { code } = useParams()
@@ -56,9 +57,17 @@ export default function Verify() {
       <h1 className="mt-5 text-25 font-semibold">Inspection record</h1>
       <p className="mt-1 font-mono text-17">{inspection.verificationCode}</p>
 
-      <p className={`mt-4 text-20 font-medium ${validity.tone}`}>{validity.line}</p>
+      <p
+        {...tourAnchor(ANCHOR.verifyValidity)}
+        className={`mt-4 text-20 font-medium ${validity.tone}`}
+      >
+        {validity.line}
+      </p>
 
-      <dl className="mt-5 divide-y divide-rail border-y border-rail">
+      <dl
+        {...tourAnchor(ANCHOR.verifyRecord)}
+        className="mt-5 divide-y divide-rail border-y border-rail"
+      >
         <div className="flex justify-between gap-4 py-2">
           <dt className="text-13 font-medium text-slate">Lift</dt>
           <dd className="text-right text-17">

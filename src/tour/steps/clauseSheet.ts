@@ -4,7 +4,7 @@
  */
 
 import { ANCHOR } from '../anchors'
-import { carryOn, midInspectionOnK1 } from '../preconditions'
+import { midInspectionOnK1 } from '../preconditions'
 import type { TourStep } from '../types'
 
 export function clauseSheetSteps(liftId = 'lift-k1'): TourStep[] {
@@ -21,7 +21,7 @@ export function clauseSheetSteps(liftId = 'lift-k1'): TourStep[] {
     },
     {
       ...base,
-      precondition: carryOn('mid-inspection'),
+      precondition: midInspectionOnK1,
       id: 'clause-sheet',
       anchor: ANCHOR.clauseSheet,
       waitFor: ANCHOR.clauseBack,
@@ -31,7 +31,7 @@ export function clauseSheetSteps(liftId = 'lift-k1'): TourStep[] {
     },
     {
       ...base,
-      precondition: carryOn('mid-inspection'),
+      precondition: midInspectionOnK1,
       id: 'clause-back',
       anchor: ANCHOR.clauseBack,
       title: 'Back to the exact spot',

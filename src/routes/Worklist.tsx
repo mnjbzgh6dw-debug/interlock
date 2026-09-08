@@ -25,6 +25,7 @@ import {
   visibleDefects,
 } from '../state/selectors'
 import { useStore } from '../state/useStore'
+import { ANCHOR, tourAnchor } from '../tour/anchors'
 import type { Defect } from '../types'
 
 function DefectRow({ defect, demoDate }: { defect: Defect; demoDate: string }) {
@@ -33,7 +34,7 @@ function DefectRow({ defect, demoDate }: { defect: Defect; demoDate: string }) {
   const overdue = isOverdue(defect, demoDate)
 
   return (
-    <li>
+    <li {...tourAnchor(ANCHOR.worklistRow(defect.id))}>
       <Link to={`/defect/${defect.id}`} className="flex items-center gap-3 bg-white px-4 py-3">
         <span className="min-w-0 flex-1">
           <span className="flex flex-wrap items-center gap-2">
@@ -98,6 +99,7 @@ export default function Worklist() {
 
         {persona.id === 'owner' && (
           <Link
+            {...tourAnchor(ANCHOR.worklistPortfolioLink)}
             to="/portfolio"
             className="mt-2 inline-flex h-tap items-center text-17 font-medium text-signal"
           >
@@ -114,7 +116,7 @@ export default function Worklist() {
           </p>
         ) : (
           <>
-            <p className="mt-3 text-17">
+            <p {...tourAnchor(ANCHOR.worklistSummary)} className="mt-3 text-17">
               {open.length} open
               {overdue.length > 0 && (
                 <>

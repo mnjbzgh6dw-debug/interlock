@@ -5,7 +5,7 @@
  */
 
 import { ANCHOR } from '../anchors'
-import { carryOn, sectionEReady } from '../preconditions'
+import { sectionEReady } from '../preconditions'
 import type { TourStep } from '../types'
 
 export function stopUseSteps(liftId = 'lift-k1'): TourStep[] {
@@ -23,7 +23,7 @@ export function stopUseSteps(liftId = 'lift-k1'): TourStep[] {
     },
     {
       ...base,
-      precondition: carryOn('section-e-ready'),
+      precondition: sectionEReady,
       id: 'stop-use-item',
       anchor: ANCHOR.formItem('E3'),
       title: 'Day 0, 08:52 — the safety gear will not hold',
@@ -31,7 +31,7 @@ export function stopUseSteps(liftId = 'lift-k1'): TourStep[] {
     },
     {
       ...base,
-      precondition: carryOn('section-e-ready'),
+      precondition: sectionEReady,
       id: 'stop-use-fire',
       anchor: ANCHOR.stopUseHeadline,
       waitFor: ANCHOR.stopUseAcknowledge,
@@ -43,7 +43,7 @@ export function stopUseSteps(liftId = 'lift-k1'): TourStep[] {
     },
     {
       ...base,
-      precondition: carryOn('section-e-ready'),
+      precondition: sectionEReady,
       id: 'stop-use-notified',
       anchor: ANCHOR.stopUseRecipients,
       dim: false,
@@ -52,7 +52,7 @@ export function stopUseSteps(liftId = 'lift-k1'): TourStep[] {
     },
     {
       ...base,
-      precondition: carryOn('section-e-ready'),
+      precondition: sectionEReady,
       id: 'stop-use-ack',
       anchor: ANCHOR.stopUseAcknowledge,
       dim: false,

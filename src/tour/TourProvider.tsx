@@ -97,7 +97,14 @@ export function TourProvider({ children }: { children: ReactNode }) {
         navigateRef.current(step.route, { replace: true })
       }
 
-      const wanted = step.waitFor ?? step.anchor
+      /**
+       * What must exist before the act, and what must exist after it, are
+       * different things. On a step that clicks a control to make something
+       * appear, `waitFor` names the thing that appears, so waiting for it first
+       * can only ever time out. Before the act, the only anchor that has to be
+       * there is the control being clicked.
+       */
+      const wanted = step.act ? step.act.anchor : step.waitFor ?? step.anchor
       const element = wanted ? await waitForAnchor(wanted, io) : null
       if (!alive()) return
       if (wanted && !element) {
@@ -133,11 +140,20 @@ export function TourProvider({ children }: { children: ReactNode }) {
           setRun((current) => (current ? { ...current, phase: 'stuck' } : current))
           return
         }
-        // An act can open an overlay, so re-resolve against the new DOM.
-        if (step.anchor) {
-          const after = await waitForAnchor(step.anchor, io, 1500)
+        // An act can open an overlay, so resolve what the step actually points
+        // at only now that it exists.
+        const target = step.waitFor ?? step.anchor
+        if (target) {
+          const after = await waitForAnchor(target, io, 1500)
           if (!alive()) return
-          if (after) await revealAnchor(after, io)
+          if (!after) {
+            console.warn(
+              `[tour] ${run!.tour.id} step ${run!.index} (${step.id}): "${target}" did not appear after the act`,
+            )
+            setRun((current) => (current ? { ...current, phase: 'stuck' } : current))
+            return
+          }
+          await revealAnchor(after, io)
           if (!alive()) return
         }
       }

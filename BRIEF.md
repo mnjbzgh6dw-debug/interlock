@@ -46,6 +46,13 @@ Do not build, do not simulate, do not mention in the UI:
 - Real SANS clause text. It is SABS copyright and paywalled. Placeholder text only, watermarked wherever a clause appears.
 - Analytics, error reporting, test suites beyond what stops you shipping something broken.
 
+**One exception, added after Tier 2: the guided walkthrough.** A product tour is
+adjacent to onboarding, which is why it is contained rather than integrated. It
+is reachable only from the demo controls panel or an explicit `?tour=<id>` link,
+it never starts on a bare visit, and nothing in the product's own chrome
+advertises it. Under those conditions it is a demo instrument, like the panel it
+lives in, rather than onboarding the product carries. See section 17.
+
 ## 4. Brand and design system
 
 ### 4.1 Design premise
@@ -533,6 +540,15 @@ Server-backed sync and conflict resolution · two-device sync · real auth and r
 
 ## 14. Demo script
 
+**On the walkthrough and this section.** This section opens by saying a dated
+story beats a screen tour, and a guided walkthrough is literally a screen tour.
+That line is guidance for the operator presenting live, and it still governs the
+walkthrough's copy: every step is titled with the date and the consequence rather
+than the name of a feature — "Day 0, 08:52 — the safety gear fails", never "the
+stop-use interstitial" — and tours are named after beats. The comprehensive tour
+is this section, in this order, on rails.
+
+
 A dated story, not a screen tour. Say the dates out loud. Feature tours are forgettable; a story with dates in it is repeatable, which matters because they will re-tell it without you.
 
 Two surfaces: **phone** in your hand, and **laptop** projected with two browser windows side by side, inspector left and technician right.
@@ -582,3 +598,53 @@ Not needed to build. Needed before anything real gets built.
 - Whether any electronic submission channel to the regulator exists.
 - Offline-first architecture. The single biggest real-build risk.
 - Enforcing the separation between inspection service provider and maintenance company, rather than merely recording it.
+
+## 17. The guided walkthrough
+
+Added after Tier 2, for the audience member who opens the link with nobody to
+explain it. Twenty tours: one per persona, one per workflow, and one
+comprehensive run of section 14. The tour drives the app itself — it navigates
+and sets up whatever state a step needs — and the viewer only presses Next and
+Back. One element is ringed, the rest is dimmed.
+
+Lives in `src/tour/`, so it can be removed in one commit. Reached from the demo
+panel, or from `?tour=<id>` (optionally `&step=<n>`), which strips its own
+parameters so a refresh does not restart the tour.
+
+Decisions worth keeping:
+
+- **It never auto-starts.** That containment is what keeps it out of the
+  onboarding non-goal in section 3.
+- **Tour state is outside the reducer**, in its own context, and the spotlight
+  rectangle is in no React state at all. A rect that tracked scroll through the
+  store would re-render every screen on every frame.
+- **The scrim is four positioned rectangles**, not a `box-shadow`, because 4.2
+  permits no shadows except a focus ring. Raising the target above a single
+  scrim with z-index was rejected because it fails silently wherever the target
+  sits in a stacking context, and the form's progress strip is one.
+- **`z-tour` (60) is the only thing in the app above `z-50`.** It has to be: the
+  tour spotlights controls inside the clause sheet and the interstitial.
+- **The stop-use screen and the printed surfaces are not dimmed.** Dimming the
+  one deliberately bold surface would cost exactly what 10.4 spends it on.
+- **A step's precondition is identified by key.** A group reuses one
+  precondition object for all its steps; the engine skips the load when the key
+  already matches, so a group works standalone and carries state forward inside
+  a long tour. Authoring rule: change the key when the copy needs a reset.
+- **Two acts only**, `click` and `fill`. Both are needed rather than
+  decorative: the interstitial lives in the form's local state and can only be
+  reached by genuinely failing E3, and measurements commit on blur so setting a
+  value alone does nothing. A click checks `aria-pressed` first, because the
+  result choices toggle and a second click would clear the failure the next
+  steps narrate.
+- **The tour never opens the camera.** Preconditions carry the committed photo
+  asset. A real capture per run is how you reach a full storage quota in front
+  of an audience.
+- **The offline tour makes a real write.** The queued count only rises when the
+  push effect sees a changed payload while offline, so it cannot be seeded. That
+  is the same honesty the `navigator.onLine` gate exists for.
+- **Every precondition broadcasts**, because `loadScenario` clears the sync refs
+  and forces a push. Jump-to-state already behaves this way. Do not run tours
+  during the live two-window demo.
+- `?tour=all&audit=1` walks every step of every tour and console-tables any
+  whose anchor never appeared or whose expectation failed. It found four real
+  bugs on its first useful run; run it after editing tours.
