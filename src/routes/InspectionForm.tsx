@@ -297,10 +297,23 @@ export default function InspectionForm() {
     }
   }, [clauseItem])
 
-  // No in-progress inspection means this was reached directly. Send them back
-  // to the lift rather than inventing a record from a URL.
+  /**
+   * No in-progress inspection means this was reached directly, so send them back
+   * to the lift rather than inventing a record from a URL. Guarded on the route
+   * still being this form: a jump-to-state clears the inspection and navigates
+   * in the same commit, and without the guard this redirect wins the race and
+   * lands somewhere the operator did not ask for.
+   */
   useEffect(() => {
-    if (lift && !inspection) navigate(`/lift/${lift.id}`, { replace: true })
+    if (!lift || inspection) return
+    const timer = setTimeout(() => {
+      // Read the live path, not a captured one: the state change and the
+      // router's own update do not always land in the same commit.
+      if (window.location.pathname === `/lift/${lift.id}/inspection`) {
+        navigate(`/lift/${lift.id}`, { replace: true })
+      }
+    }, 0)
+    return () => clearTimeout(timer)
   }, [lift, inspection, navigate])
 
   if (!lift || !inspection) return null

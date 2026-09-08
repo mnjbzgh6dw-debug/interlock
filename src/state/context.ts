@@ -19,6 +19,9 @@ export type Store = {
   saveInspection: (inspection: Inspection) => void
   saveDefect: (defect: Defect) => void
   saveDefects: (defects: Defect[]) => void
+  loadScenario: (payload: PersistedState) => void
+  /** True when writes are not being pushed: real airplane mode or the toggle. */
+  offline: boolean
   resetDemoData: () => void
 }
 
@@ -60,10 +63,36 @@ export function reducer(state: AppState, action: Action): AppState {
       return { ...state, defects: replaceById(state.defects, action.defect) }
     case 'setDefects':
       return { ...state, defects: action.defects }
+    case 'setNetworkOnline':
+      return state.networkOnline === action.online ? state : { ...state, networkOnline: action.online }
+    case 'setQueued':
+      return state.queuedWrites === action.count ? state : { ...state, queuedWrites: action.count }
+    case 'markSynced':
+      return {
+        ...state,
+        lastSyncedAt: action.at,
+        inspections: state.inspections.map((inspection) =>
+          inspection.capturedOffline && !inspection.syncedAt
+            ? { ...inspection, syncedAt: action.at }
+            : inspection,
+        ),
+      }
+    case 'hydrate':
+      // Persona is deliberately not synced: the two windows are two people.
+      return { ...state, ...action.payload }
+    case 'loadScenario':
+      return { ...state, ...action.payload, queuedWrites: 0 }
     case 'storageFull':
       // Returning the same object keeps a failing save from looping on itself.
       return state.storageFull ? state : { ...state, storageFull: true }
     case 'reset':
-      return { ...seedState(), connection: state.connection, storageFull: false }
+      return {
+        ...seedState(),
+        connection: state.connection,
+        storageFull: false,
+        queuedWrites: 0,
+        lastSyncedAt: null,
+        networkOnline: state.networkOnline,
+      }
   }
 }

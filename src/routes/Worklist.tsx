@@ -45,7 +45,9 @@ function DefectRow({ defect, demoDate }: { defect: Defect; demoDate: string }) {
                 {Math.abs(days)} days overdue
               </span>
             ) : (
-              <span className="text-17 font-medium text-open">Due in {days} days</span>
+              <span className="text-17 font-medium text-open">
+                {days === 0 ? 'Due today' : `Due in ${days} days`}
+              </span>
             )}
             {defect.severity === 'immediate' && defect.status === 'open' && (
               <StatusPill tone="stop">Not for use</StatusPill>

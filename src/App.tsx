@@ -1,4 +1,5 @@
 import { Route, Routes } from 'react-router-dom'
+import { DemoControls } from './components/DemoControls'
 import Register from './routes/Register'
 import LiftDetail from './routes/LiftDetail'
 import InspectionForm from './routes/InspectionForm'
@@ -13,18 +14,21 @@ import Landing from './routes/Landing'
 
 export default function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Landing />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/worklist" element={<Worklist />} />
-      <Route path="/defect/:defectId" element={<DefectDetail />} />
-      <Route path="/lift/:liftId" element={<LiftDetail />} />
-      <Route path="/lift/:liftId/inspection" element={<InspectionForm />} />
-      <Route path="/lift/:liftId/inspection/defects" element={<DefectReview />} />
-      <Route path="/lift/:liftId/inspection/sign-off" element={<SignOff />} />
-      <Route path="/inspection/:inspectionId/report" element={<Report />} />
-      <Route path="/inspection/:inspectionId/distribution" element={<Distribution />} />
-      <Route path="/verify/:code" element={<Verify />} />
-    </Routes>
+    <>
+      <Routes>
+        <Route path="/" element={<Landing />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/worklist" element={<Worklist />} />
+        <Route path="/defect/:defectId" element={<DefectDetail />} />
+        <Route path="/lift/:liftId" element={<LiftDetail />} />
+        <Route path="/lift/:liftId/inspection" element={<InspectionForm />} />
+        <Route path="/lift/:liftId/inspection/defects" element={<DefectReview />} />
+        <Route path="/lift/:liftId/inspection/sign-off" element={<SignOff />} />
+        <Route path="/inspection/:inspectionId/report" element={<Report />} />
+        <Route path="/inspection/:inspectionId/distribution" element={<Distribution />} />
+        <Route path="/verify/:code" element={<Verify />} />
+      </Routes>
+      <DemoControls />
+    </>
   )
 }

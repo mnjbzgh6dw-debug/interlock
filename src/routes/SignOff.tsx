@@ -19,7 +19,7 @@ import {
   notificationRecipients,
   SEVERITY_LABEL,
 } from '../lib/defects'
-import { addMonths, formatDay, INSPECTION_INTERVAL_MONTHS } from '../lib/dates'
+import { addMonths, demoTimestamp, formatDay, INSPECTION_INTERVAL_MONTHS } from '../lib/dates'
 import { inProgressFor, sectionProgress, totalAnswered, totalItems } from '../lib/inspection'
 import { buildingFor, liftById, serviceCompanyFor } from '../state/selectors'
 import { useStore } from '../state/useStore'
@@ -57,9 +57,7 @@ export default function SignOff() {
   const counts = countBySeverity(defects)
 
   function submit() {
-    const now = new Date()
-    const pad = (n: number) => String(n).padStart(2, '0')
-    const at = `${state.demoDate}T${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}+02:00`
+    const at = demoTimestamp(state.demoDate)
     /**
      * Distribution is recorded at issue, per brief section 10.8. The regulator is
      * on every report's list. Nothing is sent: this is an in-app record.

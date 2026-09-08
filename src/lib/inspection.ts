@@ -14,7 +14,7 @@ import type {
   ResponseEntry,
   ResponseResult,
 } from '../types'
-import { dayMonthCode, daysBetween } from './dates'
+import { dayMonthCode, daysBetween, demoTimestamp } from './dates'
 
 /** 'lift-k1' -> 'K1', for the verification code. */
 export function liftShort(liftId: string): string {
@@ -32,16 +32,6 @@ function hex4(): string {
 /** Brief 7.4: IL-{liftShort}-{DDMM}-{4 hex}. */
 export function verificationCode(liftId: string, day: string): string {
   return `IL-${liftShort(liftId)}-${dayMonthCode(day)}-${hex4()}`
-}
-
-/**
- * The clock time comes from the machine but the date comes from the demo date,
- * so a record made after the date is advanced still reads consistently.
- */
-function demoTimestamp(demoDate: string): string {
-  const now = new Date()
-  const pad = (n: number) => String(n).padStart(2, '0')
-  return `${demoDate}T${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}+02:00`
 }
 
 export function createInspection(

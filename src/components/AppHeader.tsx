@@ -6,7 +6,6 @@
 
 import { Link } from 'react-router-dom'
 import { Logo } from './Logo'
-import { PersonaToggle } from './PersonaToggle'
 
 export function AppHeader({ children }: { children?: React.ReactNode }) {
   return (
@@ -17,7 +16,6 @@ export function AppHeader({ children }: { children?: React.ReactNode }) {
           <span className="text-20 font-semibold tracking-wordmark">Interlock</span>
         </Link>
         {children}
-        <PersonaToggle />
       </div>
     </header>
   )

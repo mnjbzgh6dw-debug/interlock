@@ -17,7 +17,7 @@ import { StatusPill } from '../components/StatusPill'
 import { formItems } from '../data/form-passenger-a'
 import { personaById } from '../data/personas'
 import { RESPONSIBILITY_LABEL, SEVERITY_LABEL, SEVERITY_MEANING } from '../lib/defects'
-import { daysBetween, formatDay } from '../lib/dates'
+import { daysBetween, demoTimestamp, formatDay } from '../lib/dates'
 import { reminderRecipients, remindersFor } from '../lib/reminders'
 import {
   buildingFor,
@@ -73,15 +73,13 @@ export default function DefectDetail() {
 
   function close() {
     if (!evidence || !signature) return
-    const now = new Date()
-    const pad = (n: number) => String(n).padStart(2, '0')
     saveDefect({
       ...defect!,
       status: 'closed',
       evidencePhoto: evidence,
       closureSignature: signature,
       closedBy: `${persona.name}, ${persona.organisation}`,
-      closedAt: `${state.demoDate}T${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}+02:00`,
+      closedAt: demoTimestamp(state.demoDate),
     })
 
     /**
@@ -140,7 +138,9 @@ export default function DefectDetail() {
           ) : overdue ? (
             <StatusPill tone="stop">{Math.abs(days)} days overdue</StatusPill>
           ) : (
-            <StatusPill tone="open">Due in {days} days</StatusPill>
+            <StatusPill tone="open">
+              {days === 0 ? 'Due today' : `Due in ${days} days`}
+            </StatusPill>
           )}
         </div>
 

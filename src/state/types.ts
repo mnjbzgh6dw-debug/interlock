@@ -20,6 +20,15 @@ export type PersistedState = {
 export type SessionState = {
   connection: 'online' | 'offline'
   storageFull: boolean
+  /** Writes made while offline and not yet pushed to other windows. */
+  queuedWrites: number
+  /** When the queue last flushed, for the confirmation. */
+  lastSyncedAt: string | null
+  /**
+   * navigator.onLine, tracked in state so the indicator reacts the moment
+   * airplane mode goes on. The demo script points at it before any write.
+   */
+  networkOnline: boolean
 }
 
 export type AppState = PersistedState & SessionState
@@ -33,4 +42,11 @@ export type Action =
   | { type: 'putDefect'; defect: Defect }
   | { type: 'setDefects'; defects: Defect[] }
   | { type: 'storageFull' }
+  | { type: 'setQueued'; count: number }
+  | { type: 'setNetworkOnline'; online: boolean }
+  | { type: 'markSynced'; at: string }
+  /** Inbound state from another window. Never carries persona. */
+  | { type: 'hydrate'; payload: Omit<PersistedState, 'persona'> }
+  /** Jump-to-state from the demo controls. */
+  | { type: 'loadScenario'; payload: PersistedState }
   | { type: 'reset' }

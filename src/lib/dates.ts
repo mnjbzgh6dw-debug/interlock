@@ -50,6 +50,16 @@ export function formatDay(iso: string): string {
   return `${d.getUTCDate()} ${d.toLocaleString('en-ZA', { month: 'long', timeZone: 'UTC' })} ${d.getUTCFullYear()}`
 }
 
+/**
+ * A timestamp on the demo date with the real clock time, so a record made after
+ * the date is advanced still reads consistently.
+ */
+export function demoTimestamp(demoDate: string): string {
+  const now = new Date()
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${demoDate}T${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}+02:00`
+}
+
 /** '2026-09-08' -> '0809', for the verification code. */
 export function dayMonthCode(iso: string): string {
   return iso.slice(8, 10) + iso.slice(5, 7)
