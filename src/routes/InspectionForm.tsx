@@ -17,6 +17,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ClauseSheet } from '../components/ClauseSheet'
 import { StopUseInterstitial } from '../components/StopUseInterstitial'
+import { StopUseNotice } from '../components/StopUseNotice'
 import { PhotoCapture } from '../components/PhotoCapture'
 import { PlaceholderBanner } from '../components/PlaceholderBanner'
 import { SignaturePad } from '../components/SignaturePad'
@@ -31,7 +32,7 @@ import {
   totalItems,
   type Committed,
 } from '../lib/inspection'
-import { buildingFor, liftById, serviceCompanyFor } from '../state/selectors'
+import { buildingFor, liftById, serviceCompanyFor, stopUseDefects } from '../state/selectors'
 import { useStore } from '../state/useStore'
 import type { FormItem, Inspection, ResponseEntry, ResponseResult } from '../types'
 
@@ -457,6 +458,12 @@ export default function InspectionForm() {
       </div>
 
       <main ref={bodyRef} className="mx-auto max-w-[560px] px-4 pt-4">
+        {lift.stopUseInForce && (
+          <div className="mb-4">
+            <StopUseNotice defects={stopUseDefects(state, lift.id)} />
+          </div>
+        )}
+
         <h1 className="text-25 font-semibold">
           {section.id}. {section.title}
         </h1>

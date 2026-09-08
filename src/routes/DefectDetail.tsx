@@ -14,6 +14,7 @@ import { AppHeader } from '../components/AppHeader'
 import { PhotoCapture } from '../components/PhotoCapture'
 import { SignaturePad } from '../components/SignaturePad'
 import { StatusPill } from '../components/StatusPill'
+import { StopUseNotice } from '../components/StopUseNotice'
 import { formItems } from '../data/form-passenger-a'
 import { personaById } from '../data/personas'
 import { RESPONSIBILITY_LABEL, SEVERITY_LABEL, SEVERITY_MEANING } from '../lib/defects'
@@ -22,6 +23,7 @@ import { reminderRecipients, remindersFor } from '../lib/reminders'
 import {
   buildingFor,
   canClose,
+  stopUseDefects,
   isOverdue,
   liftById,
   responsiblePartyName,
@@ -144,6 +146,12 @@ export default function DefectDetail() {
           )}
         </div>
 
+        {lift.stopUseInForce && (
+          <div className="mt-4">
+            <StopUseNotice defects={stopUseDefects(state, lift.id)} />
+          </div>
+        )}
+
         <dl className="mt-4 divide-y divide-rail rounded-card border border-rail bg-white px-4">
           <div className="flex justify-between gap-4 py-2">
             <dt className="text-13 font-medium text-slate">Checklist item</dt>
@@ -198,7 +206,7 @@ export default function DefectDetail() {
                 ? 'Notified once, when the stop-use order was raised. Immediate defects are not chased on a schedule.'
                 : defect.severity === 'nextInspection'
                   ? 'Recorded against the next inspection. Not chased.'
-                  : 'No reminders yet. The first goes out 7 days before the due date.'}
+                  : 'The first reminder goes out 7 days before the due date.'}
             </p>
           ) : (
             <>

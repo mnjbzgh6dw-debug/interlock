@@ -101,9 +101,21 @@ export default function Worklist() {
           {persona.name}, {persona.organisation}
         </p>
 
+        {persona.id === 'owner' && (
+          <Link
+            to="/portfolio"
+            className="mt-2 inline-flex h-tap items-center text-17 font-medium text-signal"
+          >
+            Portfolio exposure
+          </Link>
+        )}
+
         {open.length === 0 ? (
           <p className="mt-6 text-17">
-            Nothing is outstanding. New defects arrive here when an inspection is submitted.
+            Nothing is outstanding for {persona.organisation}.{' '}
+            {persona.id === 'owner'
+              ? 'New obligations appear here when a report is issued on one of your lifts.'
+              : 'New defects appear here when a report assigns one to you.'}
           </p>
         ) : (
           <>

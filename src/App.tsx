@@ -11,6 +11,10 @@ import Verify from './routes/Verify'
 import Worklist from './routes/Worklist'
 import DefectDetail from './routes/DefectDetail'
 import Landing from './routes/Landing'
+import Portfolio from './routes/Portfolio'
+import LiftByNumber from './routes/LiftByNumber'
+import Stickers from './routes/Stickers'
+import NotFound from './routes/NotFound'
 
 export default function App() {
   return (
@@ -19,6 +23,9 @@ export default function App() {
         <Route path="/" element={<Landing />} />
         <Route path="/register" element={<Register />} />
         <Route path="/worklist" element={<Worklist />} />
+        <Route path="/portfolio" element={<Portfolio />} />
+        <Route path="/l/:officialNumber" element={<LiftByNumber />} />
+        <Route path="/stickers" element={<Stickers />} />
         <Route path="/defect/:defectId" element={<DefectDetail />} />
         <Route path="/lift/:liftId" element={<LiftDetail />} />
         <Route path="/lift/:liftId/inspection" element={<InspectionForm />} />
@@ -27,6 +34,7 @@ export default function App() {
         <Route path="/inspection/:inspectionId/report" element={<Report />} />
         <Route path="/inspection/:inspectionId/distribution" element={<Distribution />} />
         <Route path="/verify/:code" element={<Verify />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
       <DemoControls />
     </>

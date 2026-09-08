@@ -109,9 +109,9 @@ export function DemoControls() {
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="h-tap rounded-full border border-white/30 bg-shaft px-4 font-mono text-13 text-white"
+          className="h-tap rounded-full border border-white/30 bg-shaft px-3 font-mono text-13 text-white"
         >
-          Demo controls
+          Demo
         </button>
       </div>
 

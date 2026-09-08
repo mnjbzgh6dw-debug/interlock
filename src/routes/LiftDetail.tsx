@@ -8,6 +8,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { AppHeader } from '../components/AppHeader'
 import { LiftTypeIcon } from '../components/LiftTypeIcon'
 import { StatusPill } from '../components/StatusPill'
+import { StopUseNotice } from '../components/StopUseNotice'
 import {
   complianceFor,
   LIFT_TYPE_LABEL,
@@ -20,6 +21,7 @@ import { personaById } from '../data/personas'
 import {
   buildingFor,
   defectsFor,
+  stopUseDefects,
   failedItemIds,
   inspectionsFor,
   isOverdue,
@@ -172,10 +174,9 @@ export default function LiftDetail() {
         <p className={`mt-3 text-20 font-medium ${TONE_TEXT[clock.tone]}`}>{clock.label}</p>
 
         {lift.stopUseInForce && (
-          <p className="mt-3 rounded-card border border-stop bg-stop-tint p-3 text-17 text-stop">
-            This lift is under a stop-use order. No person may be conveyed until the defect is
-            rectified.
-          </p>
+          <div className="mt-3">
+            <StopUseNotice defects={stopUseDefects(state, lift.id)} linkToDefect />
+          </div>
         )}
 
         <IdentityBlock lift={lift} />
