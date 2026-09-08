@@ -1,4 +1,5 @@
 import { Logo, LogoLockup } from './components/Logo'
+import DataCheck from './DataCheck'
 
 /**
  * Scaffold check. Temporary: replaced by the lift register at item 4.
@@ -42,6 +43,8 @@ export default function App() {
       <p className="mt-1 text-15 text-slate">
         Scaffold check. Replaced by the lift register at item 4.
       </p>
+
+      <DataCheck />
 
       <section className="mt-8">
         <Label>Logo, default variant on light surfaces</Label>
