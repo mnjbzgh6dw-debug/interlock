@@ -121,6 +121,12 @@
   }
 
   /* Page-break control. An item never splits, a section never orphans a header. */
+  .report {
+    /* No single line of a paragraph left behind at a page edge. */
+    orphans: 3;
+    widows: 3;
+  }
+
   .report-section {
     break-inside: auto;
   }
@@ -134,6 +140,33 @@
   .report-block,
   .report tr {
     break-inside: avoid;
+  }
+
+  /*
+   * A signature belongs to the section above it. Without this it can be pushed
+   * alone to the top of the next page, where it reads as a signature against
+   * nothing, which on a statutory record is worse than a tight page.
+   */
+  .report-signature {
+    break-before: avoid;
+  }
+
+  /*
+   * Chrome repeats a thead across a page break, so a section's table that spans
+   * pages still says which column is which. Stated explicitly rather than left
+   * to the default.
+   */
+  .report thead {
+    display: table-header-group;
+  }
+
+  .report tfoot {
+    display: table-footer-group;
+  }
+
+  /* A section's last row should not sit flush against the next heading. */
+  .report-section {
+    margin-bottom: 6mm;
   }
 
   .report-page-break {

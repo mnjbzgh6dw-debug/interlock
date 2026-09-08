@@ -106,7 +106,7 @@ export default function Report() {
   const older = position >= 0 ? siblings[position + 1] : undefined
 
   return (
-    <div className="min-h-dvh bg-paper">
+    <div className="min-h-dvh bg-paper print:bg-white">
       {/* Screen-only chrome. None of this prints. */}
       <div className="no-print border-b border-rail bg-white">
         <div className="mx-auto flex max-w-[820px] items-center justify-between gap-3 px-4 py-3">
@@ -117,6 +117,14 @@ export default function Report() {
             <Link to={`/lift/${lift.id}/history`} className="text-15 text-signal underline">
               History
             </Link>
+            {defects.some((defect) => defect.status === 'closed') && (
+              <Link
+                to={`/inspection/${inspection.id}/addendum`}
+                className="text-15 text-signal underline"
+              >
+                Closure addendum
+              </Link>
+            )}
             <Link
               to={`/inspection/${inspection.id}/distribution`}
               className="text-15 text-signal underline"

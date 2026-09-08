@@ -520,10 +520,10 @@ One exception: the trigger is hidden on the report and the sticker sheet. Those 
 
 ### Tier 2 — polish, in this order, only if time remains
 
-22. Seeded historical inspections rendered as a browsable history rather than a list.
-23. Resume a partially completed inspection across a session.
-24. Report page-break refinement.
-25. A second report variant showing the closed-defect addendum.
+22. Seeded historical inspections rendered as a browsable history rather than a list. **Built:** `/lift/:liftId/history` states the interval between inspections so the two-year cycle is visible, and the report carries Earlier and Later navigation between that lift's reports. Elapsed time follows the same rule as the clock: days, then months, then whole years. No trend charting of readings, which is Tier 3.
+23. Resume a partially completed inspection across a session. **Built:** the section and scroll offset are kept in their own storage key, outside the data model and outside the payload that syncs between windows, and cleared at sign-off.
+24. Report page-break refinement. **Built:** orphans and widows set to 3, a section signature can no longer be pushed alone onto the next page, table headers repeat explicitly across a break, and sections carry a bottom margin. Measured on A4: a complete certificate is 4 pages, the addendum 1.
+25. A second report variant showing the closed-defect addendum. **Built:** `/inspection/:inspectionId/addendum`, referencing the parent report's verification code rather than minting its own. Per closed defect: severity, responsibility, raised, due and closed dates, who closed it, the evidence photograph and the closure signature. Anything still open is listed with its computed reminder count.
 
 ### Tier 3 — do not build
 

@@ -7,6 +7,7 @@ import DefectReview from './routes/DefectReview'
 import SignOff from './routes/SignOff'
 import Report from './routes/Report'
 import Distribution from './routes/Distribution'
+import Addendum from './routes/Addendum'
 import Verify from './routes/Verify'
 import Worklist from './routes/Worklist'
 import DefectDetail from './routes/DefectDetail'
@@ -34,6 +35,7 @@ export default function App() {
         <Route path="/lift/:liftId/inspection/defects" element={<DefectReview />} />
         <Route path="/lift/:liftId/inspection/sign-off" element={<SignOff />} />
         <Route path="/inspection/:inspectionId/report" element={<Report />} />
+        <Route path="/inspection/:inspectionId/addendum" element={<Addendum />} />
         <Route path="/inspection/:inspectionId/distribution" element={<Distribution />} />
         <Route path="/verify/:code" element={<Verify />} />
         <Route path="*" element={<NotFound />} />

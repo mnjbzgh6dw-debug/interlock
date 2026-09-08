@@ -65,7 +65,7 @@ function PanelButton({
  * is the one that has to land as paper. The panel is one tap away again as soon
  * as you navigate off them.
  */
-const PRINT_SURFACES = [/\/report$/, /^\/stickers$/]
+const PRINT_SURFACES = [/\/report$/, /\/addendum$/, /^\/stickers$/]
 
 export function DemoControls() {
   const navigate = useNavigate()
