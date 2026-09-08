@@ -7,11 +7,17 @@ import SignOff from './routes/SignOff'
 import Report from './routes/Report'
 import Distribution from './routes/Distribution'
 import Verify from './routes/Verify'
+import Worklist from './routes/Worklist'
+import DefectDetail from './routes/DefectDetail'
+import Landing from './routes/Landing'
 
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<Register />} />
+      <Route path="/" element={<Landing />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/worklist" element={<Worklist />} />
+      <Route path="/defect/:defectId" element={<DefectDetail />} />
       <Route path="/lift/:liftId" element={<LiftDetail />} />
       <Route path="/lift/:liftId/inspection" element={<InspectionForm />} />
       <Route path="/lift/:liftId/inspection/defects" element={<DefectReview />} />
