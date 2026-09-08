@@ -227,17 +227,42 @@ export default function LiftDetail() {
               {history.map((inspection) => {
                 const fails = failedItemIds(inspection).length
                 return (
-                  <li key={inspection.id} className="py-3">
-                    <p className="text-17">{formatDay(inspection.startedAt.slice(0, 10))}</p>
-                    <p className="text-15">
-                      {inspection.inspectorName} &middot; {inspection.inspectorReg}
-                    </p>
-                    <p className="font-mono text-15">{inspection.verificationCode}</p>
-                    <p className="text-15 text-slate">
-                      {fails === 0
-                        ? 'No defects recorded'
-                        : `${fails} ${fails === 1 ? 'defect' : 'defects'} recorded`}
-                    </p>
+                  <li key={inspection.id}>
+                    <Link
+                      to={`/inspection/${inspection.id}/report`}
+                      className="flex items-center gap-3 py-3"
+                    >
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-17">
+                          {formatDay(inspection.startedAt.slice(0, 10))}
+                        </span>
+                        <span className="block text-15">
+                          {inspection.inspectorName} &middot; {inspection.inspectorReg}
+                        </span>
+                        <span className="block font-mono text-15">
+                          {inspection.verificationCode}
+                        </span>
+                        <span className="block text-15 text-slate">
+                          {fails === 0
+                            ? 'No defects recorded'
+                            : `${fails} ${fails === 1 ? 'defect' : 'defects'} recorded`}
+                        </span>
+                      </span>
+                      <svg
+                        viewBox="0 0 24 24"
+                        width="20"
+                        height="20"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.75"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                        className="shrink-0 text-slate"
+                      >
+                        <path d="M9 5l7 7-7 7" />
+                      </svg>
+                    </Link>
                   </li>
                 )
               })}

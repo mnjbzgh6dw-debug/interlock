@@ -13,10 +13,15 @@ import { SignaturePad } from '../components/SignaturePad'
 import { StatusPill } from '../components/StatusPill'
 import { personaById } from '../data/personas'
 import { formPassengerA } from '../data/form-passenger-a'
-import { bySeverity, countBySeverity, SEVERITY_LABEL } from '../lib/defects'
+import {
+  bySeverity,
+  countBySeverity,
+  notificationRecipients,
+  SEVERITY_LABEL,
+} from '../lib/defects'
 import { addMonths, formatDay, INSPECTION_INTERVAL_MONTHS } from '../lib/dates'
 import { inProgressFor, sectionProgress, totalAnswered, totalItems } from '../lib/inspection'
-import { buildingFor, liftById } from '../state/selectors'
+import { buildingFor, liftById, serviceCompanyFor } from '../state/selectors'
 import { useStore } from '../state/useStore'
 
 export default function SignOff() {
@@ -54,10 +59,17 @@ export default function SignOff() {
   function submit() {
     const now = new Date()
     const pad = (n: number) => String(n).padStart(2, '0')
-    saveInspection({
-      ...inspection!,
-      completedAt: `${state.demoDate}T${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}+02:00`,
-    })
+    const at = `${state.demoDate}T${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}+02:00`
+    /**
+     * Distribution is recorded at issue, per brief section 10.8. The regulator is
+     * on every report's list. Nothing is sent: this is an in-app record.
+     */
+    const distributedTo = notificationRecipients(
+      buildingFor(lift!),
+      serviceCompanyFor(lift!),
+      true,
+    ).map((entry) => ({ ...entry, sentAt: at }))
+    saveInspection({ ...inspection!, completedAt: at, distributedTo })
     /**
      * Issuing the report restarts the compliance clock. Without this a lift that
      * has just been inspected still reads "25 days overdue" on the register,
@@ -68,7 +80,7 @@ export default function SignOff() {
       lastReportDate: state.demoDate,
       nextDueDate: addMonths(state.demoDate, INSPECTION_INTERVAL_MONTHS),
     })
-    navigate(`/lift/${lift!.id}`)
+    navigate(`/inspection/${inspection!.id}/report`)
   }
 
   return (

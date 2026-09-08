@@ -74,3 +74,81 @@
     animation: sheet-up 200ms ease-out;
   }
 }
+
+/**
+ * Print stylesheet for the report, per brief section 11. A4, hairline rules, no
+ * interactive chrome, and page breaks that never split a section mid-item.
+ *
+ * This industry's currency is the certificate in the machine compartment. If the
+ * output looks like a web page the room discounts everything else, so the print
+ * view sheds every trace of the app.
+ */
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm 14mm 18mm;
+  }
+
+  html,
+  body {
+    background: #ffffff !important;
+  }
+
+  /* Anything that only exists to be tapped. */
+  .no-print {
+    display: none !important;
+  }
+
+  .report {
+    max-width: none !important;
+    padding: 0 !important;
+    font-size: 10.5pt;
+    line-height: 1.4;
+    color: #0a2540;
+  }
+
+  /* Hairlines, not the 1px screen borders. */
+  .report .rule,
+  .report table,
+  .report th,
+  .report td {
+    border-color: #0a2540 !important;
+  }
+
+  .report th,
+  .report td {
+    border-width: 0.4pt !important;
+  }
+
+  /* Page-break control. An item never splits, a section never orphans a header. */
+  .report-section {
+    break-inside: auto;
+  }
+
+  .report-section > h2 {
+    break-after: avoid;
+  }
+
+  .report-item,
+  .report-signature,
+  .report-block,
+  .report tr {
+    break-inside: avoid;
+  }
+
+  .report-page-break {
+    break-before: page;
+  }
+
+  /* Repeated on every printed page: what the record is, in the cabinet. */
+  .report-running-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: block !important;
+    border-top: 0.4pt solid #0a2540;
+    padding-top: 4pt;
+    font-size: 8pt;
+  }
+}
