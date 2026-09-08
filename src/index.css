@@ -1,0 +1,56 @@
+/* Self-hosted so type renders in airplane mode. Weights 400 / 500 / 600 only. */
+@import '@fontsource/ibm-plex-sans/400.css';
+@import '@fontsource/ibm-plex-sans/500.css';
+@import '@fontsource/ibm-plex-sans/600.css';
+@import '@fontsource/ibm-plex-mono/400.css';
+@import '@fontsource/ibm-plex-mono/500.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Brief 4.3: tabular numerals are global and overridden nowhere. */
+  html {
+    font-variant-numeric: tabular-nums;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-paper text-shaft font-sans text-17;
+  }
+
+  /* Form controls do not inherit type by default. They must, or readings jitter. */
+  input,
+  textarea,
+  select,
+  button {
+    font: inherit;
+    font-variant-numeric: inherit;
+    color: inherit;
+  }
+
+  /* Brief 4.5: minimum tap target 48x48. Gloves. */
+  button,
+  select,
+  [role='button'] {
+    min-height: theme('spacing.tap');
+  }
+
+  /* Brief 4.2: no shadows except a functional focus ring. */
+  :focus-visible {
+    @apply outline-none ring-2 ring-signal ring-offset-2 ring-offset-paper;
+  }
+
+  /* Brief 4.6 */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
