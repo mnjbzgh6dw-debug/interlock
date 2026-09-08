@@ -218,14 +218,21 @@ export default function LiftDetail() {
         )}
 
         <section className="mt-7">
-          <h2 className="text-20 font-medium">Inspection history</h2>
+          <div className="flex items-baseline justify-between gap-3">
+            <h2 className="text-20 font-medium">Inspection history</h2>
+            {history.length > 3 && (
+              <Link to={`/lift/${lift.id}/history`} className="text-15 text-signal underline">
+                All {history.length}
+              </Link>
+            )}
+          </div>
           {history.length === 0 ? (
             <p className="mt-1 text-17">
               This lift has never been inspected. Start the first inspection below.
             </p>
           ) : (
             <ul className="mt-2 divide-y divide-rail border-y border-rail">
-              {history.map((inspection) => {
+              {history.slice(0, 3).map((inspection) => {
                 const fails = failedItemIds(inspection).length
                 return (
                   <li key={inspection.id}>

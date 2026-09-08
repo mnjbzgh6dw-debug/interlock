@@ -40,6 +40,23 @@ export const CAUTION_DAYS = 30
 export const DAYS_HORIZON = 90
 
 /**
+ * How long ago something happened, on the same principle as the countdown: days
+ * while days are meaningful, then months, then years. "2980 days ago" on a 2018
+ * inspection is a number nobody converts.
+ */
+export function elapsedLabel(from: string, to: string): string {
+  const days = daysBetween(from, to)
+  if (days < 0) return 'dated ahead of the demo date'
+  if (days === 0) return 'today'
+  if (days <= DAYS_HORIZON) return `${days} days ago`
+  const months = monthsBetween(from, to)
+  if (months < 24) return `${months} ${months === 1 ? 'month' : 'months'} ago`
+  // Past two years the extra months add nothing to a history row.
+  const years = Math.floor(months / 12)
+  return `${years} years ago`
+}
+
+/**
  * The countdown phrase, shared by the register, the lift, the portfolio and the
  * defect screens so they can never disagree about the same interval.
  */

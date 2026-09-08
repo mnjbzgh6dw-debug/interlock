@@ -33,6 +33,7 @@ import {
   type Committed,
 } from '../lib/inspection'
 import { buildingFor, liftById, serviceCompanyFor, stopUseDefects } from '../state/selectors'
+import { loadPosition, savePosition } from '../state/formPosition'
 import { useStore } from '../state/useStore'
 import type { FormItem, Inspection, ResponseEntry, ResponseResult } from '../types'
 
@@ -268,12 +269,77 @@ export default function InspectionForm() {
     () => state.inspections.find((i) => i.liftId === liftId && i.completedAt === null),
     [state.inspections, liftId],
   )
-  const [sectionId, setSectionId] = useState('A')
+  /**
+   * Tier 2 item 23: resume where the inspector left off, not at section A. The
+   * initialiser runs once, so a remembered position is picked up on mount and
+   * nothing fights the clause sheet's own scroll restore afterwards.
+   */
+  const [sectionId, setSectionId] = useState(
+    () => (inspection ? loadPosition(inspection.id)?.sectionId : null) ?? 'A',
+  )
   const [clauseItem, setClauseItem] = useState<FormItem | null>(null)
   /** Item ids whose stop-use order has been raised but not yet acknowledged. */
   const [pendingStopUse, setPendingStopUse] = useState<string[]>([])
   const bodyRef = useRef<HTMLDivElement | null>(null)
   const savedScroll = useRef(0)
+
+  /**
+   * Put the remembered offset back once this section has laid out.
+   *
+   * Retried a few times rather than set once: on the first tick the section's
+   * rows are not yet tall enough for the offset to exist, so the scroll is
+   * clamped to the top and the resume silently does nothing. Timeouts, not
+   * requestAnimationFrame, which does not fire in a tab that is not painting.
+   */
+  useEffect(() => {
+    if (!inspection) return
+    const remembered = loadPosition(inspection.id)
+    if (!remembered || remembered.sectionId !== sectionId || remembered.scrollY <= 0) return
+    const target = remembered.scrollY
+    const timers = [0, 80, 200, 400].map((delay) =>
+      setTimeout(() => {
+        if (Math.abs(window.scrollY - target) < 4) return
+        window.scrollTo(0, target)
+      }, delay),
+    )
+    return () => timers.forEach(clearTimeout)
+    // Deliberately only on mount and on a section change, never on every write.
+  }, [inspection?.id, sectionId])
+
+  /**
+   * Remember the position as the inspector works, throttled to keep writes
+   * cheap. The section comes from a ref, not the closure: with `sectionId` as a
+   * dependency the cleanup fires on every section change and writes the section
+   * being *left*, which silently clobbers the one just opened.
+   */
+  const sectionRef = useRef(sectionId)
+  sectionRef.current = sectionId
+  useEffect(() => {
+    if (!inspection) return
+    const id = inspection.id
+    let last = 0
+    function remember() {
+      const now = Date.now()
+      if (now - last < 300) return
+      last = now
+      savePosition(id, { sectionId: sectionRef.current, scrollY: window.scrollY })
+    }
+    window.addEventListener('scroll', remember, { passive: true })
+    return () => {
+      window.removeEventListener('scroll', remember)
+      /**
+       * Only a real offset is worth writing on the way out. Writing a zero here
+       * wiped the remembered position under StrictMode, whose simulated unmount
+       * runs this cleanup before the real mount has read it: the offset was
+       * destroyed in development and survived only in the production build,
+       * which is the wrong way round for a bug to behave. Scrolling back to the
+       * top is already recorded by the listener itself.
+       */
+      if (window.scrollY > 0) {
+        savePosition(id, { sectionId: sectionRef.current, scrollY: window.scrollY })
+      }
+    }
+  }, [inspection?.id])
 
   /**
    * Brief section 9: "Back to item" returns to the exact scroll position. The
@@ -403,6 +469,7 @@ export default function InspectionForm() {
 
   function goToSection(id: string) {
     setSectionId(id)
+    savePosition(inspection!.id, { sectionId: id, scrollY: 0 })
     // A new section starts at its own top, which is what a paper form does.
     bodyRef.current?.scrollIntoView({ block: 'start' })
     window.scrollTo({ top: 0 })

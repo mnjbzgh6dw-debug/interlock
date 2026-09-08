@@ -22,6 +22,7 @@ import {
 import { addMonths, demoTimestamp, formatDay, INSPECTION_INTERVAL_MONTHS } from '../lib/dates'
 import { inProgressFor, sectionProgress, totalAnswered, totalItems } from '../lib/inspection'
 import { buildingFor, liftById, serviceCompanyFor } from '../state/selectors'
+import { clearPosition } from '../state/formPosition'
 import { useStore } from '../state/useStore'
 
 export default function SignOff() {
@@ -81,6 +82,7 @@ export default function SignOff() {
       lastReportDate: state.demoDate,
       nextDueDate: addMonths(state.demoDate, INSPECTION_INTERVAL_MONTHS),
     })
+    clearPosition(inspection!.id)
     navigate(`/inspection/${inspection!.id}/report`)
   }
 

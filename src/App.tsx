@@ -14,6 +14,7 @@ import Landing from './routes/Landing'
 import Portfolio from './routes/Portfolio'
 import LiftByNumber from './routes/LiftByNumber'
 import Stickers from './routes/Stickers'
+import LiftHistory from './routes/LiftHistory'
 import NotFound from './routes/NotFound'
 
 export default function App() {
@@ -28,6 +29,7 @@ export default function App() {
         <Route path="/stickers" element={<Stickers />} />
         <Route path="/defect/:defectId" element={<DefectDetail />} />
         <Route path="/lift/:liftId" element={<LiftDetail />} />
+        <Route path="/lift/:liftId/history" element={<LiftHistory />} />
         <Route path="/lift/:liftId/inspection" element={<InspectionForm />} />
         <Route path="/lift/:liftId/inspection/defects" element={<DefectReview />} />
         <Route path="/lift/:liftId/inspection/sign-off" element={<SignOff />} />

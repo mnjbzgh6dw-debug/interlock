@@ -17,7 +17,7 @@ import { LIFT_TYPE_LABEL } from '../lib/compliance'
 import { bySeverity, RESPONSIBILITY_LABEL, SEVERITY_LABEL } from '../lib/defects'
 import { formatDay } from '../lib/dates'
 import { displayValue } from '../lib/inspection'
-import { buildingFor, liftById, serviceCompanyFor } from '../state/selectors'
+import { buildingFor, inspectionsFor, liftById, serviceCompanyFor } from '../state/selectors'
 import { useStore } from '../state/useStore'
 import type { Inspection, Lift, ResponseResult } from '../types'
 
@@ -96,6 +96,15 @@ export default function Report() {
     .sort(bySeverity)
   const verifyUrl = `${window.location.origin}${import.meta.env.BASE_URL}verify/${inspection.verificationCode}`
 
+  /**
+   * Tier 2 item 22: the history is browsable from the report itself. Newest
+   * first, so the *next* entry in the list is the older inspection.
+   */
+  const siblings = inspectionsFor(state, lift.id).filter((i) => i.completedAt !== null)
+  const position = siblings.findIndex((i) => i.id === inspection.id)
+  const newer = position > 0 ? siblings[position - 1] : undefined
+  const older = position >= 0 ? siblings[position + 1] : undefined
+
   return (
     <div className="min-h-dvh bg-paper">
       {/* Screen-only chrome. None of this prints. */}
@@ -105,6 +114,9 @@ export default function Report() {
             {lift.label}, {building.name}
           </Link>
           <div className="flex items-center gap-3">
+            <Link to={`/lift/${lift.id}/history`} className="text-15 text-signal underline">
+              History
+            </Link>
             <Link
               to={`/inspection/${inspection.id}/distribution`}
               className="text-15 text-signal underline"
@@ -378,6 +390,36 @@ export default function Report() {
           </div>
         </div>
       </article>
+
+      {siblings.length > 1 && (
+        <nav className="no-print mx-auto max-w-[820px] px-8 pb-10">
+          <p className="text-13 font-medium text-slate">
+            Inspection {siblings.length - position} of {siblings.length} for {lift.label}
+          </p>
+          <div className="mt-2 flex flex-wrap gap-3">
+            {older ? (
+              <Link
+                to={`/inspection/${older.id}/report`}
+                className="inline-flex h-tap items-center rounded-card border border-rail bg-white px-4 text-17 text-signal"
+              >
+                Earlier: {formatDay(older.startedAt.slice(0, 10))}
+              </Link>
+            ) : (
+              <p className="inline-flex h-tap items-center text-17 text-slate">
+                Earliest on record
+              </p>
+            )}
+            {newer && (
+              <Link
+                to={`/inspection/${newer.id}/report`}
+                className="inline-flex h-tap items-center rounded-card border border-rail bg-white px-4 text-17 text-signal"
+              >
+                Later: {formatDay(newer.startedAt.slice(0, 10))}
+              </Link>
+            )}
+          </div>
+        </nav>
+      )}
     </div>
   )
 }
