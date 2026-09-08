@@ -1,13 +1,16 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   /**
-   * GitHub Pages serves a project site from /<repo>/, so every asset and route
-   * hangs off that prefix. BASE_URL flows into the router's basename and into
-   * the QR URLs, so nothing has this path hard-coded twice.
+   * GitHub Pages serves a project site from /<repo>/, so the built site hangs
+   * every asset and route off that prefix. Dev stays at the root, so `npm run
+   * dev` is still just localhost:5173.
+   *
+   * BASE_URL carries this into the router's basename and the QR URLs, so the
+   * path is written once and both environments are correct.
    */
-  base: '/interlock/',
+  base: command === 'build' ? '/interlock/' : '/',
   plugins: [react()],
   server: { host: true },
   build: {
@@ -18,4 +21,4 @@ export default defineConfig({
      */
     assetsInlineLimit: 0,
   },
-})
+}))

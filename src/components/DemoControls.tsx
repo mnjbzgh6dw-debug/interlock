@@ -7,7 +7,7 @@
  */
 
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { formPassengerA } from '../data/form-passenger-a'
 import { personas } from '../data/personas'
 import { formatDay } from '../lib/dates'
@@ -58,8 +58,18 @@ function PanelButton({
   )
 }
 
+/**
+ * The report and the sticker sheet are the two surfaces whose whole job is to
+ * not look like an app. A floating operator pill in the corner of the
+ * certificate is the most app-like thing in that frame, and the certificate beat
+ * is the one that has to land as paper. The panel is one tap away again as soon
+ * as you navigate off them.
+ */
+const PRINT_SURFACES = [/\/report$/, /^\/stickers$/]
+
 export function DemoControls() {
   const navigate = useNavigate()
+  const { pathname } = useLocation()
   const [open, setOpen] = useState(false)
   const {
     state,
@@ -100,6 +110,8 @@ export function DemoControls() {
     }
     saveInspection({ ...inProgress, responses })
   }
+
+  if (PRINT_SURFACES.some((pattern) => pattern.test(pathname))) return null
 
   return (
     <>

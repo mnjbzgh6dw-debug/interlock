@@ -21,7 +21,7 @@ import { AppHeader } from '../components/AppHeader'
 import { LiftTypeIcon } from '../components/LiftTypeIcon'
 import { StatusPill } from '../components/StatusPill'
 import { personaById } from '../data/personas'
-import { complianceFor, TONE_TEXT } from '../lib/compliance'
+import { complianceFor, countdownLabel, TONE_TEXT } from '../lib/compliance'
 import { RESPONSIBILITY_LABEL } from '../lib/defects'
 import { daysBetween, formatDay } from '../lib/dates'
 import {
@@ -196,17 +196,12 @@ export default function Portfolio() {
             <ul className="mt-2 divide-y divide-rail border-y border-rail">
               {open.map((defect) => {
                 const late = isOverdue(defect, state.demoDate)
-                const days = Math.abs(daysBetween(state.demoDate, defect.dueDate))
                 const lift = state.lifts.find((entry) => entry.id === defect.liftId)!
                 return (
                   <li key={defect.id}>
                     <Link to={`/defect/${defect.id}`} className="block bg-white px-4 py-3">
                       <span className={`text-17 font-medium ${late ? 'text-stop' : 'text-open'}`}>
-                        {late
-                          ? `${days} days overdue`
-                          : days === 0
-                            ? 'Due today'
-                            : `Due in ${days} days`}
+                        {countdownLabel(state.demoDate, defect.dueDate)}
                       </span>
                       <span className="mt-0.5 block text-17">{defect.description}</span>
                       <span className="block text-15">

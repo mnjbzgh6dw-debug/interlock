@@ -13,8 +13,8 @@ import { Link } from 'react-router-dom'
 import { AppHeader } from '../components/AppHeader'
 import { StatusPill } from '../components/StatusPill'
 import { personaById } from '../data/personas'
+import { countdownLabel } from '../lib/compliance'
 import { RESPONSIBILITY_LABEL } from '../lib/defects'
-import { daysBetween } from '../lib/dates'
 import {
   buildingFor,
   byUrgency,
@@ -31,7 +31,6 @@ function DefectRow({ defect, demoDate }: { defect: Defect; demoDate: string }) {
   const { state } = useStore()
   const lift = liftById(state, defect.liftId)!
   const overdue = isOverdue(defect, demoDate)
-  const days = daysBetween(demoDate, defect.dueDate)
 
   return (
     <li>
@@ -40,13 +39,9 @@ function DefectRow({ defect, demoDate }: { defect: Defect; demoDate: string }) {
           <span className="flex flex-wrap items-center gap-2">
             {defect.status === 'closed' ? (
               <span className="text-17 font-medium text-verified">Closed</span>
-            ) : overdue ? (
-              <span className="text-17 font-medium text-stop">
-                {Math.abs(days)} days overdue
-              </span>
             ) : (
-              <span className="text-17 font-medium text-open">
-                {days === 0 ? 'Due today' : `Due in ${days} days`}
+              <span className={`text-17 font-medium ${overdue ? 'text-stop' : 'text-open'}`}>
+                {countdownLabel(demoDate, defect.dueDate)}
               </span>
             )}
             {defect.severity === 'immediate' && defect.status === 'open' && (

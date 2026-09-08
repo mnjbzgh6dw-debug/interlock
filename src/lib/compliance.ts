@@ -11,7 +11,7 @@
  */
 
 import type { Lift, LiftType } from '../types'
-import { daysBetween } from './dates'
+import { daysBetween, monthsBetween } from './dates'
 
 export type ComplianceTone = 'stop' | 'open' | 'verified'
 
@@ -26,22 +26,40 @@ export type Compliance = {
 /** Inside this many days the clock moves to caution. */
 export const CAUTION_DAYS = 30
 
+/**
+ * Beyond this, the countdown is stated in months.
+ *
+ * Days are what matter when something is overdue or close, and the brief asks
+ * for a countdown rather than a date. But "Due in 681 days" is a number nobody
+ * converts while holding a phone, and six of the eight seeded lifts sit that far
+ * out, which left the hero element on the register doing no work. Ninety days is
+ * already a meaningful line here: it is the longest horizon the form grades to.
+ *
+ * The exact date is not lost. It stays in the lift's identity block.
+ */
+export const DAYS_HORIZON = 90
+
+/**
+ * The countdown phrase, shared by the register, the lift, the portfolio and the
+ * defect screens so they can never disagree about the same interval.
+ */
+export function countdownLabel(from: string, to: string): string {
+  const days = daysBetween(from, to)
+  if (days < 0) return `${Math.abs(days)} days overdue`
+  if (days === 0) return 'Due today'
+  if (days <= DAYS_HORIZON) return `Due in ${days} days`
+  const months = monthsBetween(from, to)
+  return `Due in ${months} ${months === 1 ? 'month' : 'months'}`
+}
+
 export function complianceFor(lift: Lift, demoDate: string): Compliance {
   if (!lift.nextDueDate) {
     return { label: 'Never inspected', tone: 'stop', days: null }
   }
   const days = daysBetween(demoDate, lift.nextDueDate)
-  if (days < 0) {
-    return { label: `${Math.abs(days)} days overdue`, tone: 'stop', days }
-  }
-  if (days === 0) {
-    return { label: 'Due today', tone: 'stop', days }
-  }
-  return {
-    label: `Due in ${days} days`,
-    tone: days <= CAUTION_DAYS ? 'open' : 'verified',
-    days,
-  }
+  const label = countdownLabel(demoDate, lift.nextDueDate)
+  if (days <= 0) return { label, tone: 'stop', days }
+  return { label, tone: days <= CAUTION_DAYS ? 'open' : 'verified', days }
 }
 
 export const TONE_TEXT: Record<ComplianceTone, string> = {

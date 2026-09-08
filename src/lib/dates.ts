@@ -25,6 +25,16 @@ export function daysBetween(from: string, to: string): number {
   return Math.round((parseDay(to).getTime() - parseDay(from).getTime()) / DAY_MS)
 }
 
+/** Whole months from `from` to `to`. Partial months are not counted. */
+export function monthsBetween(from: string, to: string): number {
+  const a = parseDay(from)
+  const b = parseDay(to)
+  let months =
+    (b.getUTCFullYear() - a.getUTCFullYear()) * 12 + (b.getUTCMonth() - a.getUTCMonth())
+  if (b.getUTCDate() < a.getUTCDate()) months -= 1
+  return months
+}
+
 /** Whole months forward, clamped to the end of the target month. */
 export function addMonths(iso: string, months: number): string {
   const d = parseDay(iso)

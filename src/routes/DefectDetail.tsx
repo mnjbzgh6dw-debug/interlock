@@ -17,8 +17,9 @@ import { StatusPill } from '../components/StatusPill'
 import { StopUseNotice } from '../components/StopUseNotice'
 import { formItems } from '../data/form-passenger-a'
 import { personaById } from '../data/personas'
+import { countdownLabel } from '../lib/compliance'
 import { RESPONSIBILITY_LABEL, SEVERITY_LABEL, SEVERITY_MEANING } from '../lib/defects'
-import { daysBetween, demoTimestamp, formatDay } from '../lib/dates'
+import { demoTimestamp, formatDay } from '../lib/dates'
 import { reminderRecipients, remindersFor } from '../lib/reminders'
 import {
   buildingFor,
@@ -64,7 +65,6 @@ export default function DefectDetail() {
   const company = serviceCompanyFor(lift)
   const item = formItems.get(defect.itemId)
   const overdue = isOverdue(defect, state.demoDate)
-  const days = daysBetween(state.demoDate, defect.dueDate)
   const reminders = remindersFor(
     defect,
     state.demoDate,
@@ -138,11 +138,9 @@ export default function DefectDetail() {
           {defect.status === 'closed' ? (
             <StatusPill tone="verified">Closed</StatusPill>
           ) : overdue ? (
-            <StatusPill tone="stop">{Math.abs(days)} days overdue</StatusPill>
+            <StatusPill tone="stop">{countdownLabel(state.demoDate, defect.dueDate)}</StatusPill>
           ) : (
-            <StatusPill tone="open">
-              {days === 0 ? 'Due today' : `Due in ${days} days`}
-            </StatusPill>
+            <StatusPill tone="open">{countdownLabel(state.demoDate, defect.dueDate)}</StatusPill>
           )}
         </div>
 
