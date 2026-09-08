@@ -2,6 +2,12 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
 export default defineConfig({
+  /**
+   * GitHub Pages serves a project site from /<repo>/, so every asset and route
+   * hangs off that prefix. BASE_URL flows into the router's basename and into
+   * the QR URLs, so nothing has this path hard-coded twice.
+   */
+  base: '/interlock/',
   plugins: [react()],
   server: { host: true },
   build: {

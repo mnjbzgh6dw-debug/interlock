@@ -11,7 +11,7 @@ import { useStore } from '../state/useStore'
 
 export default function Stickers() {
   const { state } = useStore()
-  const origin = window.location.origin
+  const base = `${window.location.origin}${import.meta.env.BASE_URL}`
 
   return (
     <div className="min-h-dvh bg-paper">
@@ -40,7 +40,7 @@ export default function Stickers() {
               key={lift.id}
               className="report-item flex items-center gap-3 border border-dashed border-shaft p-3"
             >
-              <VerificationQr url={`${origin}/l/${lift.officialNumber}`} size={92} />
+              <VerificationQr url={`${base}l/${lift.officialNumber}`} size={92} />
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
                   <Logo size={20} variant="reversed" labelled={false} />

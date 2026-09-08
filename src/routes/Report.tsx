@@ -94,7 +94,7 @@ export default function Report() {
   const defects = state.defects
     .filter((defect) => defect.inspectionId === inspection.id)
     .sort(bySeverity)
-  const verifyUrl = `${window.location.origin}/verify/${inspection.verificationCode}`
+  const verifyUrl = `${window.location.origin}${import.meta.env.BASE_URL}verify/${inspection.verificationCode}`
 
   return (
     <div className="min-h-dvh bg-paper">
