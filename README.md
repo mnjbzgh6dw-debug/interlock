@@ -6,6 +6,8 @@ A demo-only proof of concept for statutory lift inspection: from the machine roo
 to the certificate, to the closed defect. Shown once, on a phone and a projected
 laptop. Not production software.
 
+Live: https://mnjbzgh6dw-debug.github.io/interlock/
+
 ## Running it
 
 ```
@@ -22,5 +24,16 @@ npm i && npm run dev
 - Nothing is ever sent. Notifications, distribution lists and reminders are
   recorded in the app only.
 - There is no server and no authentication. State lives in the browser.
+
+## Deploying
+
+```
+npm run deploy
+```
+
+Builds and publishes to the `gh-pages` branch via a throwaway git worktree.
+GitHub Pages has no rewrite rules, so `404.html` is a copy of `index.html`: a deep
+link such as `/verify/:code` is served that copy and the router takes it from
+there. Deep links therefore load correctly but report a 404 status.
 
 The specification is `BRIEF.md`. The working agreement is `CLAUDE.md`.
