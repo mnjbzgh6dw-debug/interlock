@@ -8,6 +8,7 @@
 
 import type { FormItem } from '../types'
 import type { Recipient } from '../lib/defects'
+import { ANCHOR, tourAnchor } from '../tour/anchors'
 
 type Props = {
   item: FormItem
@@ -35,7 +36,7 @@ export function StopUseInterstitial({
     >
       <div className="mx-auto flex min-h-dvh max-w-[560px] flex-col px-5 py-8">
         <p className="text-13 font-medium">Stop-use order</p>
-        <h1 className="mt-2 text-31 font-semibold">
+        <h1 {...tourAnchor(ANCHOR.stopUseHeadline)} className="mt-2 text-31 font-semibold">
           No person may be conveyed in this lift until the defect is rectified.
         </h1>
 
@@ -54,7 +55,10 @@ export function StopUseInterstitial({
           </p>
         </div>
 
-        <div className="mt-4 border-t border-white/30 pt-4">
+        <div
+          {...tourAnchor(ANCHOR.stopUseRecipients)}
+          className="mt-4 border-t border-white/30 pt-4"
+        >
           <p className="text-13 font-medium">Being notified</p>
           <ul className="mt-1">
             {recipients.map((entry) => (
@@ -70,6 +74,7 @@ export function StopUseInterstitial({
         <div className="mt-auto pt-8">
           <button
             type="button"
+            {...tourAnchor(ANCHOR.stopUseAcknowledge)}
             onClick={onAcknowledge}
             className="h-tap w-full rounded-card bg-white text-17 font-medium text-stop"
           >

@@ -12,9 +12,11 @@ type Props = {
   /** Named in the error text so a failure says which item it belongs to. */
   label: string
   required: boolean
+  /** Optional data-tour value for the guided walkthrough. */
+  anchor?: string
 }
 
-export function PhotoCapture({ value, onChange, label, required }: Props) {
+export function PhotoCapture({ value, onChange, label, required, anchor }: Props) {
   const inputRef = useRef<HTMLInputElement | null>(null)
   const [busy, setBusy] = useState(false)
   const [problem, setProblem] = useState<string | null>(null)
@@ -57,6 +59,7 @@ export function PhotoCapture({ value, onChange, label, required }: Props) {
       <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
+          {...(anchor ? { 'data-tour': anchor } : {})}
           onClick={() => inputRef.current?.click()}
           className={`h-tap rounded-card border px-4 text-17 font-medium ${
             required && !value ? 'border-stop bg-stop text-white' : 'border-signal text-signal'

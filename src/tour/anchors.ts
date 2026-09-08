@@ -36,6 +36,11 @@ export const ANCHOR = {
   formBanner: 'form-banner',
   formProgress: 'form-progress',
   formSection: (sectionId: string) => `form-section-${sectionId}`,
+  /**
+   * Only the current section's items are in the DOM, so a step targeting an
+   * item outside the open section must switch to it first, with a click act on
+   * `formSection`. The audit catches this as a missing anchor.
+   */
   formItem: (itemId: string) => `form-item-${itemId}`,
   formItemClause: (itemId: string) => `form-item-${itemId}-clause`,
   formItemInput: (itemId: string) => `form-item-${itemId}-input`,

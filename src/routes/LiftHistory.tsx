@@ -16,6 +16,7 @@ import { elapsedLabel, LIFT_TYPE_LABEL } from '../lib/compliance'
 import { formatDay, monthsBetween } from '../lib/dates'
 import { buildingFor, failedItemIds, inspectionsFor, liftById } from '../state/selectors'
 import { useStore } from '../state/useStore'
+import { ANCHOR, tourAnchor } from '../tour/anchors'
 
 export default function LiftHistory() {
   const { liftId } = useParams()
@@ -84,7 +85,10 @@ export default function LiftHistory() {
               {formatDay(history[0].startedAt.slice(0, 10))}.
             </p>
 
-            <ol className="mt-4 divide-y divide-rail border-y border-rail">
+            <ol
+              {...tourAnchor(ANCHOR.historyList)}
+              className="mt-4 divide-y divide-rail border-y border-rail"
+            >
               {history.map((inspection, index) => {
                 const day = (inspection.completedAt ?? inspection.startedAt).slice(0, 10)
                 const previous = history[index + 1]

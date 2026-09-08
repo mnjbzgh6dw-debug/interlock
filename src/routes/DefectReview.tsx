@@ -22,6 +22,7 @@ import { formatDay } from '../lib/dates'
 import { inProgressFor } from '../lib/inspection'
 import { buildingFor, liftById, serviceCompanyFor } from '../state/selectors'
 import { useStore } from '../state/useStore'
+import { ANCHOR, tourAnchor } from '../tour/anchors'
 import type { Defect, Responsibility } from '../types'
 
 export default function DefectReview() {
@@ -92,7 +93,7 @@ export default function DefectReview() {
             </p>
 
             {/* Running count by severity. */}
-            <ul className="mt-3 flex flex-wrap gap-2">
+            <ul {...tourAnchor(ANCHOR.reviewCounts)} className="mt-3 flex flex-wrap gap-2">
               {counts.map(({ severity, count }) => (
                 <li key={severity}>
                   <StatusPill
@@ -115,7 +116,11 @@ export default function DefectReview() {
                 const item = formItems.get(defect.itemId)
                 const immediate = defect.severity === 'immediate'
                 return (
-                  <li key={defect.id} className="py-4">
+                  <li
+                    key={defect.id}
+                    {...tourAnchor(ANCHOR.reviewDefect(defect.itemId))}
+                    className="py-4"
+                  >
                     <div className="flex items-start justify-between gap-3">
                       <p className="flex-1 text-17 font-medium">{defect.description}</p>
                       <StatusPill tone={immediate ? 'stop' : 'open'}>
@@ -139,7 +144,10 @@ export default function DefectReview() {
                     )}
 
                     <p className="mt-3 text-13 font-medium text-slate">Responsibility</p>
-                    <div className="mt-1 grid grid-cols-2 gap-2">
+                    <div
+                      {...tourAnchor(ANCHOR.reviewResponsibility(defect.itemId))}
+                      className="mt-1 grid grid-cols-2 gap-2"
+                    >
                       {(['serviceCompany', 'owner'] as const).map((responsibility) => {
                         const selected = defect.responsibility === responsibility
                         return (
@@ -170,7 +178,10 @@ export default function DefectReview() {
         )}
       </main>
 
-      <div className="fixed inset-x-0 bottom-0 border-t border-rail bg-white">
+      <div
+        {...tourAnchor(ANCHOR.reviewAction)}
+        className="fixed inset-x-0 bottom-0 border-t border-rail bg-white"
+      >
         <div className="mx-auto max-w-[560px] px-4 py-3">
           <button
             type="button"

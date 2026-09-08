@@ -15,6 +15,7 @@ import { revealAnchor, waitForAnchor } from './spotlight'
 import { performAct } from './act'
 import { clearSnapshot, writeSnapshot, type TourSnapshot } from './snapshot'
 import { tourById } from './tours'
+import { runAudit } from './audit'
 import type { TourControl, TourRun } from './types'
 
 const clamp = (value: number, low: number, high: number) =>
@@ -232,7 +233,19 @@ export function TourProvider({ children }: { children: ReactNode }) {
     // effect keyed on useSearchParams would re-fire when ?print=1 appears.
     const params = new URLSearchParams(window.location.search)
     const id = params.get('tour')
-    if (!id || !tourById.has(id)) return
+    if (!id) return
+
+    /** Development instrument: walk every step and report dead anchors. */
+    if (id === 'all' && params.get('audit') === '1') {
+      void runAudit(
+        () => storeRef.current,
+        (to, options) => navigateRef.current(to, options),
+        import.meta.env.BASE_URL.replace(/\/$/, ''),
+      )
+      return
+    }
+
+    if (!tourById.has(id)) return
     const step = Number(params.get('step') ?? 0)
 
     params.delete('tour')

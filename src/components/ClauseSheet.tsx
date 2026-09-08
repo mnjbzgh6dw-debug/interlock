@@ -14,6 +14,7 @@
 import { useEffect } from 'react'
 import { PLACEHOLDER_NOTICE } from '../data/form-passenger-a'
 import type { FormItem } from '../types'
+import { ANCHOR, tourAnchor } from '../tour/anchors'
 
 export function ClauseSheet({ item, onClose }: { item: FormItem; onClose: () => void }) {
   useEffect(() => {
@@ -36,6 +37,7 @@ export function ClauseSheet({ item, onClose }: { item: FormItem; onClose: () => 
         role="dialog"
         aria-modal="true"
         aria-label={`Clause ${item.clauseRef}`}
+        {...tourAnchor(ANCHOR.clauseSheet)}
         className="sheet-up relative max-h-[85dvh] overflow-y-auto rounded-t-sheet bg-white"
       >
         <div className="mx-auto max-w-[560px] px-4 pb-4 pt-5">
@@ -48,6 +50,7 @@ export function ClauseSheet({ item, onClose }: { item: FormItem; onClose: () => 
           </p>
           <button
             type="button"
+            {...tourAnchor(ANCHOR.clauseBack)}
             onClick={onClose}
             className="mt-4 h-tap w-full rounded-card bg-signal text-17 font-medium text-white"
           >

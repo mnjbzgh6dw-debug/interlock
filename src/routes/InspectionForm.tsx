@@ -35,6 +35,7 @@ import {
 import { buildingFor, liftById, serviceCompanyFor, stopUseDefects } from '../state/selectors'
 import { loadPosition, savePosition } from '../state/formPosition'
 import { useStore } from '../state/useStore'
+import { ANCHOR, tourAnchor } from '../tour/anchors'
 import type { FormItem, Inspection, ResponseEntry, ResponseResult } from '../types'
 
 const RESULT_LABEL: Record<ResponseResult, string> = {
@@ -67,6 +68,7 @@ function ResultChoice({
           <button
             key={result}
             type="button"
+            {...tourAnchor(ANCHOR.formItemResult(item.id, result))}
             aria-pressed={selected}
             onClick={() => onSet(selected ? null : result)}
             className={`h-tap rounded-card border text-17 font-medium ${
@@ -110,6 +112,7 @@ function MeasurementField({
         <div className="flex items-center gap-2">
           <input
             type="text"
+            {...tourAnchor(ANCHOR.formItemInput(item.id))}
             inputMode={item.unit === 'count' ? 'numeric' : 'decimal'}
             enterKeyHint="done"
             value={draft}
@@ -195,7 +198,7 @@ function ItemRow({
   const photoOutstanding = failed && item.photoRequiredOnFail && !response?.photo
 
   return (
-    <li className="py-3">
+    <li className="py-3" {...tourAnchor(ANCHOR.formItem(item.id))}>
       <div className="flex items-start gap-2">
         <p className="flex-1 text-17">
           <span className="font-medium">{item.id}</span> {item.text}
@@ -203,6 +206,7 @@ function ItemRow({
         {/* Shares the item's vertical space, so a 48px hit area costs no height. */}
         <button
           type="button"
+          {...tourAnchor(ANCHOR.formItemClause(item.id))}
           onClick={onOpenClause}
           className="-my-1 h-tap shrink-0 px-2 text-13 font-medium text-signal"
         >
@@ -250,6 +254,7 @@ function ItemRow({
           )}
           <PhotoCapture
             label={item.text.toLowerCase()}
+            anchor={ANCHOR.formItemPhoto(item.id)}
             required={item.photoRequiredOnFail}
             value={response?.photo}
             onChange={(photo) => onResponse({ ...response!, photo })}
@@ -494,7 +499,10 @@ export default function InspectionForm() {
       <PlaceholderBanner />
 
       {/* Progress strip. Reports completion, never gates it. */}
-      <div className="sticky top-0 z-10 border-b border-rail bg-white">
+      <div
+        {...tourAnchor(ANCHOR.formProgress)}
+        className="sticky top-0 z-10 border-b border-rail bg-white"
+      >
         <div className="mx-auto max-w-[560px] px-4 py-2">
           <div className="flex items-baseline justify-between">
             <p className="text-13 font-medium text-slate">Progress</p>
@@ -509,6 +517,7 @@ export default function InspectionForm() {
                 <button
                   key={entry.id}
                   type="button"
+                  {...tourAnchor(ANCHOR.formSection(entry.id))}
                   onClick={() => goToSection(entry.id)}
                   disabled={blocked && !current}
                   aria-current={current ? 'true' : undefined}
@@ -555,7 +564,7 @@ export default function InspectionForm() {
           ))}
         </ul>
 
-        <div className="mt-6">
+        <div className="mt-6" {...tourAnchor(ANCHOR.formSignature)}>
           <SignaturePad
             label={`Inspector signature, section ${section.id}`}
             value={inspection.sectionSignatures[section.id] ?? null}
@@ -585,7 +594,10 @@ export default function InspectionForm() {
         />
       )}
 
-      <div className="fixed inset-x-0 bottom-0 border-t border-rail bg-white">
+      <div
+        {...tourAnchor(ANCHOR.formAction)}
+        className="fixed inset-x-0 bottom-0 border-t border-rail bg-white"
+      >
         <div className="mx-auto max-w-[560px] px-4 py-3">
           {blocked && (
             <p className="mb-2 text-15 text-stop">

@@ -24,6 +24,7 @@ import { inProgressFor, sectionProgress, totalAnswered, totalItems } from '../li
 import { buildingFor, liftById, serviceCompanyFor } from '../state/selectors'
 import { clearPosition } from '../state/formPosition'
 import { useStore } from '../state/useStore'
+import { ANCHOR, tourAnchor } from '../tour/anchors'
 
 export default function SignOff() {
   const { liftId } = useParams()
@@ -110,7 +111,10 @@ export default function SignOff() {
       <main className="mx-auto max-w-[560px] px-4 pt-5">
         <h1 className="text-25 font-semibold">Sign off</h1>
 
-        <dl className="mt-4 divide-y divide-rail rounded-card border border-rail bg-white px-4">
+        <dl
+          {...tourAnchor(ANCHOR.signOffSummary)}
+          className="mt-4 divide-y divide-rail rounded-card border border-rail bg-white px-4"
+        >
           <div className="flex items-baseline justify-between gap-4 py-2">
             <dt className="text-13 font-medium text-slate">Items answered</dt>
             <dd className="text-17">
@@ -170,7 +174,10 @@ export default function SignOff() {
 
         <section className="mt-6">
           <h2 className="text-20 font-medium">Inspector</h2>
-          <div className="mt-2 rounded-card border border-rail bg-white p-4">
+          <div
+            {...tourAnchor(ANCHOR.signOffInspector)}
+            className="mt-2 rounded-card border border-rail bg-white p-4"
+          >
             <p className="text-17">{inspector.name}</p>
             <p className="text-15">Registered Lift Inspector, {inspector.reg}</p>
             <p className="text-15">
@@ -179,7 +186,7 @@ export default function SignOff() {
           </div>
         </section>
 
-        <div className="mt-6">
+        <div className="mt-6" {...tourAnchor(ANCHOR.signOffSignature)}>
           <SignaturePad
             label="Inspector signature"
             value={inspection.finalSignature}
@@ -188,7 +195,10 @@ export default function SignOff() {
         </div>
       </main>
 
-      <div className="fixed inset-x-0 bottom-0 border-t border-rail bg-white">
+      <div
+        {...tourAnchor(ANCHOR.signOffAction)}
+        className="fixed inset-x-0 bottom-0 border-t border-rail bg-white"
+      >
         <div className="mx-auto max-w-[560px] px-4 py-3">
           {!inspection.finalSignature && (
             <p className="mb-2 text-15 text-slate">Sign above to submit the report.</p>

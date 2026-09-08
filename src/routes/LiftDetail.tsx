@@ -30,6 +30,7 @@ import {
   serviceCompanyFor,
 } from '../state/selectors'
 import { useStore } from '../state/useStore'
+import { ANCHOR, tourAnchor } from '../tour/anchors'
 import type { Defect, Lift } from '../types'
 
 function Field({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
@@ -66,7 +67,10 @@ function IdentityBlock({ lift }: { lift: Lift }) {
   const building = buildingFor(lift)
   const company = serviceCompanyFor(lift)
   return (
-    <dl className="mt-4 divide-y divide-rail rounded-card border border-rail bg-white px-4">
+    <dl
+      {...tourAnchor(ANCHOR.liftIdentity)}
+      className="mt-4 divide-y divide-rail rounded-card border border-rail bg-white px-4"
+    >
       <Field label="Official number" value={lift.officialNumber} mono />
       <Field label="Type" value={LIFT_TYPE_LABEL[lift.type]} />
       <Field label="Floors served" value={String(lift.floorsServed)} />
@@ -171,17 +175,22 @@ export default function LiftDetail() {
         </h1>
         <p className="text-17 text-slate">{buildingFor(lift).name}</p>
 
-        <p className={`mt-3 text-20 font-medium ${TONE_TEXT[clock.tone]}`}>{clock.label}</p>
+        <p
+          {...tourAnchor(ANCHOR.liftClock)}
+          className={`mt-3 text-20 font-medium ${TONE_TEXT[clock.tone]}`}
+        >
+          {clock.label}
+        </p>
 
         {lift.stopUseInForce && (
-          <div className="mt-3">
+          <div className="mt-3" {...tourAnchor(ANCHOR.liftStopUse)}>
             <StopUseNotice defects={stopUseDefects(state, lift.id)} linkToDefect />
           </div>
         )}
 
         <IdentityBlock lift={lift} />
 
-        <section className="mt-7">
+        <section className="mt-7" {...tourAnchor(ANCHOR.liftOpenDefects)}>
           <h2 className="text-20 font-medium">
             Open defects{open.length > 0 ? ` (${open.length})` : ''}
           </h2>
@@ -217,7 +226,7 @@ export default function LiftDetail() {
           </section>
         )}
 
-        <section className="mt-7">
+        <section className="mt-7" {...tourAnchor(ANCHOR.liftHistory)}>
           <div className="flex items-baseline justify-between gap-3">
             <h2 className="text-20 font-medium">Inspection history</h2>
             {history.length > 3 && (
@@ -279,7 +288,10 @@ export default function LiftDetail() {
         </section>
       </main>
 
-      <div className="fixed inset-x-0 bottom-0 border-t border-rail bg-white">
+      <div
+        {...tourAnchor(ANCHOR.liftAction)}
+        className="fixed inset-x-0 bottom-0 border-t border-rail bg-white"
+      >
         <div className="mx-auto max-w-[560px] px-4 py-3">
           {state.persona !== 'inspector' ? (
             /*
