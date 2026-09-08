@@ -14,7 +14,7 @@
 
 import { useCallback, useEffect, useMemo, useReducer, useRef, type ReactNode } from 'react'
 import { clearState, loadState, saveState } from './persistence'
-import { reducer, seedState, StoreContext, type Store } from './context'
+import { persistedOf, reducer, seedState, StoreContext, type Store } from './context'
 import { demoTimestamp } from '../lib/dates'
 import type { AppState, PersistedState } from './types'
 
@@ -31,20 +31,9 @@ function initialState(): AppState {
   }
 }
 
-function persisted(state: AppState): PersistedState {
-  return {
-    version: state.version,
-    demoDate: state.demoDate,
-    persona: state.persona,
-    lifts: state.lifts,
-    inspections: state.inspections,
-    defects: state.defects,
-  }
-}
-
 /** What crosses between windows. Persona stays local: two windows, two people. */
 function shared(state: AppState): Omit<PersistedState, 'persona'> {
-  const { persona: _persona, ...rest } = persisted(state)
+  const { persona: _persona, ...rest } = persistedOf(state)
   return rest
 }
 
@@ -68,7 +57,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   // Mirror to storage on every write, per brief 7.3. Nothing here can throw
   // into the render path: a failure keeps the session in memory and says so.
   useEffect(() => {
-    const payload = persisted(state)
+    const payload = persistedOf(state)
     const serialised = JSON.stringify(payload)
     if (serialised === lastSaved.current) return
     if (saveState(payload) === 'saved') {

@@ -15,6 +15,9 @@ import { scenarios } from '../lib/scenarios'
 import { useStore } from '../state/useStore'
 import type { ResponseEntry } from '../types'
 import { SyncIndicator } from './SyncIndicator'
+import { tours, toursByKind } from '../tour/tours'
+import { useTourControl } from '../tour/useTour'
+import { ANCHOR, tourAnchor } from '../tour/anchors'
 
 /** Plausible in-range readings, so a filled form prints real measurements. */
 const FILLED_MEASUREMENTS: Record<string, string> = {
@@ -67,9 +70,16 @@ function PanelButton({
  */
 const PRINT_SURFACES = [/\/report$/, /\/addendum$/, /^\/stickers$/]
 
+const TOUR_GROUPS = [
+  { kind: 'comprehensive' as const, title: 'the whole story' },
+  { kind: 'persona' as const, title: 'by role' },
+  { kind: 'workflow' as const, title: 'by workflow' },
+]
+
 export function DemoControls() {
   const navigate = useNavigate()
   const { pathname } = useLocation()
+  const tour = useTourControl()
   const [open, setOpen] = useState(false)
   const {
     state,
@@ -117,9 +127,12 @@ export function DemoControls() {
     <>
       {/* Always reachable, and clearly not part of the app. */}
       <div className="no-print fixed bottom-24 right-3 z-40 flex flex-col items-end gap-2">
-        <SyncIndicator />
+        <div {...tourAnchor(ANCHOR.syncIndicator)}>
+          <SyncIndicator />
+        </div>
         <button
           type="button"
+          {...tourAnchor(ANCHOR.demoPill)}
           onClick={() => setOpen(true)}
           className="h-tap rounded-full border border-white/30 bg-shaft px-3 font-mono text-13 text-white"
         >
@@ -253,6 +266,36 @@ export function DemoControls() {
                   No inspection in progress. Start one from a lift.
                 </p>
               )}
+            </Section>
+
+            <Section title="guided walkthrough">
+              <p className="mb-2 text-13 text-white/70">
+                Each one drives the app itself. You only press Next.
+              </p>
+              {TOUR_GROUPS.filter((group) => toursByKind(group.kind).length > 0).map((group) => (
+                <div key={group.kind} className="mb-3">
+                  <p className="font-mono text-13 text-white/50">{group.title}</p>
+                  <div className="mt-1 grid gap-2">
+                    {toursByKind(group.kind).map((entry) => (
+                      <PanelButton
+                        key={entry.id}
+                        onClick={() => {
+                          setOpen(false)
+                          tour.start(entry.id)
+                        }}
+                      >
+                        {entry.label}
+                        <span className="block text-13 opacity-80">{entry.blurb}</span>
+                      </PanelButton>
+                    ))}
+                  </div>
+                </div>
+              ))}
+              <p className="text-13 text-white/70">
+                {tours.length} available. A link ending in ?tour={tours[0]?.id ?? 'register'}{' '}
+                opens straight into one, which is how to point someone at it without changing
+                the app.
+              </p>
             </Section>
 
             <Section title="jump to state">

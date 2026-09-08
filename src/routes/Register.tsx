@@ -14,6 +14,7 @@ import { StatusPill } from '../components/StatusPill'
 import { complianceFor, LIFT_TYPE_LABEL, TONE_TEXT } from '../lib/compliance'
 import { liftsByBuilding } from '../state/selectors'
 import { useStore } from '../state/useStore'
+import { ANCHOR, tourAnchor } from '../tour/anchors'
 import type { Building, Lift } from '../types'
 
 function matches(lift: Lift, building: Building, query: string): boolean {
@@ -29,7 +30,7 @@ function matches(lift: Lift, building: Building, query: string): boolean {
 function LiftRow({ lift, demoDate }: { lift: Lift; demoDate: string }) {
   const clock = complianceFor(lift, demoDate)
   return (
-    <li>
+    <li {...tourAnchor(ANCHOR.registerRow(lift.id))}>
       <Link
         to={`/lift/${lift.id}`}
         className={`flex items-center gap-3 bg-white px-4 py-3 ${
@@ -38,7 +39,12 @@ function LiftRow({ lift, demoDate }: { lift: Lift; demoDate: string }) {
       >
         <span className="min-w-0 flex-1">
           <span className="flex flex-wrap items-center gap-2">
-            <span className={`text-17 font-medium ${TONE_TEXT[clock.tone]}`}>{clock.label}</span>
+            <span
+              {...tourAnchor(ANCHOR.registerClock(lift.id))}
+              className={`text-17 font-medium ${TONE_TEXT[clock.tone]}`}
+            >
+              {clock.label}
+            </span>
             {lift.stopUseInForce && <StatusPill tone="stop">Not for use</StatusPill>}
           </span>
           <span className="mt-0.5 flex items-center gap-2 text-17">
@@ -96,6 +102,7 @@ export default function Register() {
         <label className="mt-4 block">
           <span className="text-13 font-medium text-slate">Search</span>
           <input
+            {...tourAnchor(ANCHOR.registerSearch)}
             type="search"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
@@ -113,7 +120,11 @@ export default function Register() {
           </p>
         ) : (
           groups.map(({ building, lifts }) => (
-            <section key={building.id} className="mt-7">
+            <section
+              key={building.id}
+              {...tourAnchor(ANCHOR.registerBuilding(building.id))}
+              className="mt-7"
+            >
               <h2 className="text-20 font-medium">{building.name}</h2>
               <p className="text-15 text-slate">{building.address}</p>
               <ul className="mt-2 divide-y divide-rail border-y border-rail">

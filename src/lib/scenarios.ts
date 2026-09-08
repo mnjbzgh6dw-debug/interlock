@@ -19,12 +19,17 @@ export type Scenario = {
   build: () => PersistedState
 }
 
-function base(): PersistedState {
+/**
+ * Exported for the guided walkthrough's preconditions. Deliberately not added to
+ * the `scenarios` array below: DemoControls maps that unconditionally, so
+ * anything in it also becomes a jump-to-state button in the panel.
+ */
+export function base(): PersistedState {
   return { ...seedState(), persona: 'inspector' }
 }
 
 /** A part-walked section A, so the form opens with work already in it. */
-function midInspection(): PersistedState {
+export function midInspection(): PersistedState {
   const state = base()
   const lift = state.lifts.find((l) => l.id === 'lift-k1')!
   const inspection = createInspection(
@@ -43,7 +48,7 @@ function midInspection(): PersistedState {
 }
 
 /** Kestrel Lift 1 out of use, with the immediate defect standing against it. */
-function stopUseInForce(): PersistedState {
+export function stopUseInForce(): PersistedState {
   const state = base()
   const lift = state.lifts.find((l) => l.id === 'lift-k1')!
   const inspection = createInspection(

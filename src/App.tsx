@@ -1,5 +1,6 @@
 import { Route, Routes } from 'react-router-dom'
 import { DemoControls } from './components/DemoControls'
+import { TourOverlay } from './tour/TourOverlay'
 import Register from './routes/Register'
 import LiftDetail from './routes/LiftDetail'
 import InspectionForm from './routes/InspectionForm'
@@ -41,6 +42,12 @@ export default function App() {
         <Route path="*" element={<NotFound />} />
       </Routes>
       <DemoControls />
+      {/*
+        * Outside DemoControls on purpose: that component unmounts on the print
+        * surfaces, and the certificate is a step the tour has to reach. Last in
+        * the tree, so equal z-index resolves in the tour's favour.
+        */}
+      <TourOverlay />
     </>
   )
 }

@@ -27,6 +27,22 @@ export type Store = {
 
 export const StoreContext = createContext<Store | null>(null)
 
+/**
+ * The persisted slice of the app state. Lives here rather than in the provider
+ * because it is non-component code, and because the guided walkthrough needs it
+ * to snapshot what it is about to change.
+ */
+export function persistedOf(state: AppState): PersistedState {
+  return {
+    version: state.version,
+    demoDate: state.demoDate,
+    persona: state.persona,
+    lifts: state.lifts,
+    inspections: state.inspections,
+    defects: state.defects,
+  }
+}
+
 export function seedState(): PersistedState {
   return {
     version: STATE_VERSION,

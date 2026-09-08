@@ -39,6 +39,14 @@ export default {
       spacing: {
         tap: '48px',
       },
+      /**
+       * The guided walkthrough is the only thing in this app above z-50, which
+       * is where the clause sheet, the stop-use interstitial and the demo panel
+       * all sit. It has to be, because it spotlights controls inside them.
+       */
+      zIndex: {
+        tour: '60',
+      },
     },
   },
   plugins: [],
